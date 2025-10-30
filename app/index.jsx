@@ -1,12 +1,10 @@
-import {
-    Poppins_700Bold
-} from '@expo-google-fonts/poppins'
+import Fonts from '@/constants/fonts'
 import React from 'react'
 import { Text } from 'react-native'
 
 
 export default function Index() {
     return (
-        <Text style={{ fontFamily: Poppins_700Bold, padding: 20 }}>Hello, World!</Text>
+        <Text style={{ fontFamily: Fonts.Poppins_700Bold, padding: 20, fontSize: 40 }}>Hello, World!</Text>
     )
 }
