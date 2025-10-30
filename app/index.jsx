@@ -1,10 +1,13 @@
-import Fonts from '@/constants/fonts'
-import React from 'react'
-import { Text } from 'react-native'
+import { useFont } from '@/context/FontContext';
+import React from 'react';
+import { Text } from 'react-native';
 
 
 export default function Index() {
+
+    const fonts = useFont();
+
     return (
-        <Text style={{ fontFamily: Fonts.Poppins_700Bold, padding: 20, fontSize: 40 }}>Hello, World!</Text>
+        <Text style={{ fontFamily: fonts.regular , padding: 20, fontSize: 40 }}>Hello, World!</Text>
     )
 }
