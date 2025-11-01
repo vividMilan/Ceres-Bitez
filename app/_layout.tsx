@@ -6,7 +6,7 @@ export default function RootLayout() {
 
   return (
     <FontProvider>
-      <Stack screenOptions={{headerShown: false}} />
+      <Stack />
     </FontProvider>
   );
 }

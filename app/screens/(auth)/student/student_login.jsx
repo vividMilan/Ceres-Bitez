@@ -1,12 +1,17 @@
+import fontSize from "@/constants/fontSizes"
 import { Colors } from "@/constants/theme"
+import { useFont } from "@/context/FontContext"
 import { router } from "expo-router"
 import React from "react"
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 
 export default function student_login() {
+
+    const fonts = useFont()
+
     return (
         <View>
-            <Text>Login</Text>
+            <Text style={styles.title}>Login</Text>
             <TextInput 
                 placeholder="Username"
             />
@@ -33,7 +38,12 @@ export default function student_login() {
 }
 
 const styles = StyleSheet.create({
+    title: {
+        fontSize: fontSize.large,
+        fontFamily: fonts.semibold
+    },
     button:{
-        backgroundColor: Colors.light.primary
+        backgroundColor: Colors.theme.primary,
+        color: Colors.theme.text
     }
 })
