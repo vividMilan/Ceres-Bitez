@@ -1,10 +1,12 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function login() {
+
+    const router = useRouter()
     
     return (
         <View style={globalStyles.container}>
@@ -37,12 +39,12 @@ export default function login() {
                         style={{height: 20, width: 20}}
                     />
                 </Pressable>
-                <Link href={"/signUp"} asChild> 
+                <Pressable onPress={() => router.replace('/signUp')}> 
                     <Text style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
                         Dont Have an account
                         <Text style={[{color: Colors.default.primary, fontFamily: fonts.semiBold}]}> Sign Up</Text>
                     </Text>
-                </Link>
+                </Pressable>
             </View>
         </View>
     )

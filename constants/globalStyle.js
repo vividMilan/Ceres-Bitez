@@ -9,7 +9,7 @@ export const globalStyles = StyleSheet.create({
         marginBottom: 20
     },
     regularText: {
-        fontFamily: fonts.regular,
+        fontFamily: fonts.regular
     },
     container: {
         paddingHorizontal: 20,
@@ -25,7 +25,7 @@ export const globalStyles = StyleSheet.create({
         alignItems: "center",
         padding: 8,
         borderRadius: 5,
-        marginBottom: 50
+        marginBottom: 20
     },
     buttonText: {
         color: Colors.default.background,
