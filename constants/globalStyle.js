@@ -5,7 +5,7 @@ import { Colors } from "./theme";
 export const globalStyles = StyleSheet.create({
     titleText: {
         fontFamily: fonts.semiBold,
-        fontSize: fontSizes.regular,
+        fontSize: fontSizes.title,
         marginBottom: 20
     },
     regularText: {
@@ -25,7 +25,7 @@ export const globalStyles = StyleSheet.create({
         alignItems: "center",
         padding: 8,
         borderRadius: 5,
-        marginBottom: 20
+        marginBottom: 50
     },
     buttonText: {
         color: Colors.default.background,
@@ -38,7 +38,7 @@ export const globalStyles = StyleSheet.create({
         marginBottom: 20,
         borderRadius: 100,
         backgroundColor: Colors.default.greyBackground,
-        color: Colors.default.inputText
+        color: Colors.default.text
     },
     outlineButton: {
         width: "100%",
@@ -48,6 +48,6 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 5,
         borderColor: Colors.default.primary,
         borderWidth: 3,
-        backgroundColor: "transparent"
+        backgroundColor: "transparent",
     }
 })
