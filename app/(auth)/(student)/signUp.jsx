@@ -8,7 +8,7 @@ import { Checkbox } from 'expo-checkbox';
 import * as ImagePicker from "expo-image-picker";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function signUp() {
 
@@ -98,12 +98,12 @@ export default function signUp() {
                     <Text style={globalStyles.regularText}>By selecting checkbox accept the terms and conditions</Text>
                 </View>
 
-                <Pressable
+                <TouchableOpacity
                     onPress={() => console.log("Login Clicked")}
                     style={[globalStyles.button]}
                 >
                     <Text style={[globalStyles.buttonText]}>Sign Up</Text>
-                </Pressable>
+                </TouchableOpacity>
 
 
                 {/* Login Button */}

@@ -1,6 +1,7 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
+import { userRoles } from "@/data/userRoles";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -11,44 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import homeIcon from "../assets/images/icons/home-icon.png";
-import ngoIcon from "../assets/images/icons/NGO-icon.png";
-import restaurantIcon from "../assets/images/icons/restaurant-icon.png";
-import studentIcon from "../assets/images/icons/student-icon.png";
-import volunteerIcon from "../assets/images/icons/volunteer-icon.png";
 
-const DATA = [
-  {
-    id: "1",
-    title: "NGO",
-    icon: ngoIcon,
-    route: "#",
-  },
-  {
-    id: "2",
-    title: "Restaurant",
-    icon: restaurantIcon,
-    route: "#",
-  },
-  {
-    id: "3",
-    title: "Volunteer",
-    icon: volunteerIcon,
-    route: "#",
-  },
-  {
-    id: "4",
-    title: "Student",
-    icon: studentIcon,
-    route: "#",
-  },
-  {
-    id: "5",
-    title: "Home",
-    icon: homeIcon,
-    route: "#",
-  },
-];
 
 /* Component for rendering each user type item */
 const Item = ({ id, title, icon, isSelected, onSelect }) => {
@@ -83,14 +47,16 @@ export default function Index() {
 
   // Function to handle next button press
   const handleNext = () => {
-    router.navigate("/(auth)/(student)/signUp")
+    if(selectedId === "student") {
+        router.navigate("/(auth)/(student)/signUp")
+    }
   };
 
   return (
     <View style={globalStyles.container}>
         <Text style={globalStyles.headingText}>Who Are You ?</Text>
         <FlatList
-          data={DATA}
+          data={userRoles}
           renderItem={({ item }) => (
             <Item
               title={item.title}

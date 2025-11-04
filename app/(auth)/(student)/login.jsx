@@ -1,8 +1,8 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { useRouter } from "expo-router";
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Link, useRouter } from "expo-router";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function login() {
 
@@ -23,13 +23,13 @@ export default function login() {
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
                 />
-                <Pressable
+                <TouchableOpacity
                     onPress={() => console.log("Login Clicked")}
                     style={globalStyles.button}
                 >
                     <Text style={globalStyles.buttonText}>Login </Text>
-                </Pressable>
-                <Pressable
+                </TouchableOpacity>
+                <TouchableOpacity
                     onPress={() => console.log("Login Clicked")}
                     style={[globalStyles.outlineButton, styles.iconButton]}
                 >
@@ -38,13 +38,13 @@ export default function login() {
                         source={require("../../../assets/images/icons/google-icon.png")}
                         style={{height: 20, width: 20}}
                     />
-                </Pressable>
-                <Pressable onPress={() => router.replace('/signUp')}> 
+                </TouchableOpacity>
+                <Link href={"/signUp"}> 
                     <Text style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
                         Dont Have an account
                         <Text style={[{color: Colors.default.primary, fontFamily: fonts.semiBold}]}> Sign Up</Text>
                     </Text>
-                </Pressable>
+                </Link>
             </View>
         </View>
     )
