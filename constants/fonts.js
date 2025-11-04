@@ -7,5 +7,6 @@ export const fonts = {
 
 export const fontSizes = {
     regular: 20,
-    title: 30
+    title: 30,
+    heading: 40
 }

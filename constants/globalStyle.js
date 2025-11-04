@@ -3,6 +3,10 @@ import { fonts, fontSizes } from "./fonts";
 import { Colors } from "./theme";
 
 export const globalStyles = StyleSheet.create({
+    headingText: {
+        fontFamily: fonts.semiBold,
+        fontSize: fontSizes.heading
+    },
     titleText: {
         fontFamily: fonts.semiBold,
         fontSize: fontSizes.regular,
@@ -23,13 +27,14 @@ export const globalStyles = StyleSheet.create({
         backgroundColor: Colors.default.primary,
         justifyContent: "center",
         alignItems: "center",
-        padding: 8,
-        borderRadius: 5,
-        marginBottom: 20
+        padding: 12,
+        borderRadius: 10,
+        marginBottom: 20, 
     },
     buttonText: {
         color: Colors.default.background,
-        fontFamily: fonts.medium
+        fontFamily: fonts.semiBold,
+        fontSize: fontSizes.regular
     },
     input: {
         paddingHorizontal: 15,
