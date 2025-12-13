@@ -24,7 +24,7 @@ export default function login() {
                     placeholderTextColor={Colors.default.inputText}
                 />
                 <TouchableOpacity
-                    onPress={() => console.log("Login Clicked")}
+                    onPress={() => router.navigate("/student")}
                     style={globalStyles.button}
                 >
                     <Text style={globalStyles.buttonText}>Login </Text>

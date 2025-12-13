@@ -5,12 +5,12 @@ import { userRoles } from "@/data/userRoles";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 
@@ -50,6 +50,14 @@ export default function Index() {
     if(selectedId === "student") {
         router.navigate("/(auth)/(student)/signUp")
     }
+
+    if(selectedId === "volunteer") {
+        router.navigate("/(auth)/(volunteer)/signUp")
+    }
+
+    if(selectedId === "home") {
+        router.navigate("home")
+    }
   };
 
   return (
@@ -69,7 +77,7 @@ export default function Index() {
           keyExtractor={(item) => item.id}
         />
       <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
-        <Text style={globalStyles.buttonText}>Next</Text>
+        <Text style={globalStyles.buttonText}>Next </Text>
       </TouchableOpacity>
     </View>
   );
