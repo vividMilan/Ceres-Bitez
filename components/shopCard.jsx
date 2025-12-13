@@ -1,11 +1,15 @@
 import { fonts } from "@/constants/fonts";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function ShopCard({image, shopName, rating, deliveryTIme, priceRange}) {
+
+    const router = useRouter()
+
     return (
-        <TouchableOpacity style={styles.shopCard}>
+        <TouchableOpacity style={styles.shopCard} onPress={() => router.navigate("/student/shopPage")}>
 
             <Image source={image} style={{width:"100%", height: 200, borderRadius: 5}}/>
 
