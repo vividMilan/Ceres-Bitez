@@ -8,7 +8,7 @@ import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 const shopsData = [
   {
     id: "1",
-    image: require("../../assets/images/shops/shop1.png"),
+    image: require("../../../../assets/images/shops/shop1.png"),
     shopName: "Foodie's Hub",
     rating: 4.5,
     deliveryTime: "30-40 mins",
@@ -17,7 +17,7 @@ const shopsData = [
   },
   {
     id: "2",
-    image: require("../../assets/images/shops/shop2.png"),
+    image: require("../../../../assets/images/shops/shop2.png"),
     shopName: "Hopper Spot",
     rating: 4.5,
     deliveryTime: "20 mins",
@@ -26,7 +26,7 @@ const shopsData = [
   },
   {
     id: "3",
-    image: require("../../assets/images/shops/shop3.png"),
+    image: require("../../../../assets/images/shops/shop3.png"),
     shopName: "Spicy Bite",
     rating: 4.2,
     deliveryTime: "25 mins",

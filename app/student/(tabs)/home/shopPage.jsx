@@ -1,8 +1,9 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Image, Text, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function ShopPage() {
 
@@ -20,11 +21,13 @@ export default function ShopPage() {
         }
     }
 
+    const router = useRouter()
+
     return (
 
         <>
             <View>
-                <Image source={require("../../assets/images/shops/shop1.png")} style={{width: "100%", height: 200}} />
+                <Image source={require("../../../../assets/images/shops/shop1.png")} style={{width: "100%", height: 200}} />
                 <Text style={[globalStyles.titleText, {textAlign: "center"}]}>Spicy Hut</Text>
             </View>
             <View style={globalStyles.container}>
@@ -66,6 +69,10 @@ export default function ShopPage() {
                         <FontAwesome name="plus-circle" size={32} color="black" onPress={() => increaseQty(qty + 1)}/>
                     </View>
                 </View>
+
+                <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate("/student/home/OrderSummery")}>
+                    <Text style={globalStyles.buttonText}>Next</Text>
+                </TouchableOpacity>
                 
 
             </View>       

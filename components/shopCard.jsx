@@ -9,7 +9,7 @@ export default function ShopCard({image, shopName, rating, deliveryTIme, priceRa
     const router = useRouter()
 
     return (
-        <TouchableOpacity style={styles.shopCard} onPress={() => router.navigate("/student/shopPage")}>
+        <TouchableOpacity style={styles.shopCard} onPress={() => router.navigate("/student/home/shopPage")}>
 
             <Image source={image} style={{width:"100%", height: 200, borderRadius: 5}}/>
 
