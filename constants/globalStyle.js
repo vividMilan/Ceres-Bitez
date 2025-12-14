@@ -12,6 +12,11 @@ export const globalStyles = StyleSheet.create({
         fontSize: fontSizes.title,
         marginBottom: 20
     },
+    subTitleText: {
+        fontFamily: fonts.semiBold,
+        fontSize: fontSizes.subTitle,
+        marginBottom: 10
+    },
     regularText: {
         fontFamily: fonts.regular
     },
