@@ -1,9 +1,10 @@
 import Accordian from '@/components/Accordian';
+import PageTitleWithBackButton from '@/components/PageTitleWithBackButton';
 import { fonts } from '@/constants/fonts';
 import { globalStyles } from '@/constants/globalStyle';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 const orderDetail = [
@@ -28,12 +29,14 @@ const orderDetail = [
 ]
 
 export default function OderSummery() {
+
+    const router = useRouter()
+
     return (
         <ScrollView stickyHeaderIndices={[0]} style={globalStyles.container}>
-            <View style={{flexDirection: "row", width:"100%", backgroundColor: "transperant"}}>
-                <Ionicons name="arrow-back-outline" size={40} color="black" style={{marginRight: 10}}/>
-                <Text style={[globalStyles.titleText]}>Order Summery</Text>
-            </View>
+            <PageTitleWithBackButton 
+                heading={"Summery"}
+            />
             <View>
                 <View style={{marginBottom: 20}}>
                     <Text style={[globalStyles.subTitleText]}>Address</Text>
@@ -58,6 +61,25 @@ export default function OderSummery() {
                         />
                     ))}
                 </View>
+                <View style={{marginBottom: 20}}>
+                    <Text style={[globalStyles.subTitleText]}>Price</Text>
+                    <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                        <Text style={{fontSize: 20, fontFamily: fonts.regular}}>Fish Rice & Curry</Text>
+                        <Text style={{fontSize: 20, fontFamily: fonts.regular}}>150.00</Text>
+                    </View>
+                    <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                        <Text style={{fontSize: 20, fontFamily: fonts.regular}}>Egg Hoppers</Text>
+                        <Text style={{fontSize: 20, fontFamily: fonts.regular}}>200.00</Text>
+                    </View>
+                    <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                        <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>Total</Text>
+                        <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>150.00</Text>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]} onPress={() => router.navigate("/student/(tabs)/home/checkout")}>
+                    <Text style={globalStyles.buttonText}>Next</Text>
+                </TouchableOpacity>
             </View>
         </ScrollView>
     )

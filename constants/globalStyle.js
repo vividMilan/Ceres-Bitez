@@ -5,7 +5,8 @@ import { Colors } from "./theme";
 export const globalStyles = StyleSheet.create({
     headingText: {
         fontFamily: fonts.semiBold,
-        fontSize: fontSizes.heading
+        fontSize: fontSizes.heading,
+        marginBottom: 12
     },
     titleText: {
         fontFamily: fonts.semiBold,
@@ -59,5 +60,10 @@ export const globalStyles = StyleSheet.create({
         borderColor: Colors.default.primary,
         borderWidth: 3,
         backgroundColor: "transparent",
+    },
+    spaceBetween: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between"
     }
 })
