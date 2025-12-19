@@ -4,7 +4,6 @@ export default function StudentLayout() {
     return (
         <Stack>
             <Stack.Screen name="(tabs)" options={{headerShown: false}} />
-            <Stack.Screen name="shopPage" options={{headerShown: false}} />
         </Stack>
     )
 }

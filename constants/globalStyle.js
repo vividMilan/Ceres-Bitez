@@ -64,6 +64,7 @@ export const globalStyles = StyleSheet.create({
     spaceBetween: {
         display: "flex",
         flexDirection: "row",
-        justifyContent: "space-between"
+        justifyContent: "space-between",
+        alignItems: "center"
     }
 })

@@ -17,7 +17,7 @@ export default function Index() {
                     <FontAwesome5 name="info-circle" size={24} color="black" />
                     <Text style={[globalStyles.regularText, {fontSize: 20}]}>About</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
+                <TouchableOpacity style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}} onPress={() => router.navigate("/student/(tabs)/profile/paymentMethods")}>
                     <MaterialIcons name="payment" size={24} color="black" />
                     <Text style={[globalStyles.regularText, {fontSize: 20}]}>Payment Method</Text>
                 </TouchableOpacity>

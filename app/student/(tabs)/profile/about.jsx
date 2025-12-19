@@ -9,8 +9,11 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { fonts, fontSizes } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
 
 export default function About() {
+
+    const router = useRouter()
 
     const profile_pic = require("../../../../assets/images/profile_pic.png")
 
@@ -18,7 +21,7 @@ export default function About() {
         <>
             <View style={styles.banner}>
                 <View style={{width: "100%", flexDirection: "row", alignItems: "center"}}>
-                    <Ionicons name="arrow-back-outline" size={36} color="white" style={{marginRight: 10}}/> 
+                    <Ionicons onPress={() => router.back()} name="arrow-back-outline" size={36} color="white" style={{marginRight: 10}}/> 
                     <Text style={{fontSize: fontSizes.title, color: "white"}}>Back</Text>
                 </View>
                 <View style={styles.info_banner}>
@@ -31,29 +34,29 @@ export default function About() {
                 </View>
             </View>
             <View style={[globalStyles.container, {gap: 20}]}>
-                <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+                <View style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <FontAwesome name="user-circle" size={32} color="black" />
-                    <Text style={[globalStyles.regularText, {fontSize: 20}]}>Ajith Dheena</Text>
+                    <Text style={[globalStyles.regularText]}>Ajith Dheena</Text>
                 </View>
-                <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+                <View style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <MaterialIcons name="location-on" size={32} color="black" />
-                    <Text style={[globalStyles.regularText, {fontSize: 20}]}>Nawala</Text>
+                    <Text style={[globalStyles.regularText]}>Nawala</Text>
                 </View>
-                <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+                <View style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <MaterialCommunityIcons name="book-education" size={32} color="black" />
-                    <Text style={[globalStyles.regularText, {fontSize: 20}]}>The Open University of Sri Lanka</Text>
+                    <Text style={[globalStyles.regularText]}>The Open University of Sri Lanka</Text>
                 </View>
-                <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+                <View style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <Fontisto name="date" size={32} color="black" />
-                    <Text style={[globalStyles.regularText, {fontSize: 20}]}>2025/10/01</Text>
+                    <Text style={[globalStyles.regularText]}>2025/10/01</Text>
                 </View>
-                <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+                <View style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <Ionicons name="call" size={32} color="black" />
-                    <Text style={[globalStyles.regularText, {fontSize: 20}]}>71 8622 126</Text>
+                    <Text style={[globalStyles.regularText]}>71 8622 126</Text>
                 </View>
-                <View style={{display: "flex", flexDirection: "row", gap: 10}}>
+                <View style={{display: "flex", flexDirection: "row", gap: 10, alignItems: "center"}}>
                     <Zocial name="email" size={32} color="black" />
-                    <Text style={[globalStyles.regularText, {fontSize: 20}]}>student@university.lk</Text>
+                    <Text style={[globalStyles.regularText]}>student@university.lk</Text>
                 </View>
             </View>
         </>

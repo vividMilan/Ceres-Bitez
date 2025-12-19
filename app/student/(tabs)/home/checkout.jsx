@@ -6,6 +6,22 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
+
+const paymentMethods = [
+    {
+        name: "Sampath",
+        cardNo: "xxxx8999",
+        icon: <FontAwesome6 name="cc-visa" size={32} color="#1A1F71" />
+    },
+    {
+        name: "Commercial",
+        cardNo: "xxxx8779",
+        icon: <FontAwesome6 name="cc-mastercard" size={32} color="#EB001B" />
+    }
+
+]
+
+
 export default function CheckOut() {
 
     const [isSelected, setIsSelected] = useState("")
