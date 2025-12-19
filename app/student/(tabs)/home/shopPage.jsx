@@ -70,7 +70,7 @@ export default function ShopPage() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={globalStyles.button} onPress={() => router.navigate("/student/home/OrderSummery")}>
+                <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]} onPress={() => router.navigate("/student/home/OrderSummery")}>
                     <Text style={globalStyles.buttonText}>Next</Text>
                 </TouchableOpacity>
                 

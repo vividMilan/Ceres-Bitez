@@ -1,3 +1,4 @@
+import { fonts } from "@/constants/fonts";
 import { Colors } from "@/constants/theme";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -6,7 +7,26 @@ import { Tabs } from "expo-router";
 
 export default function StudentTabLayout() {
     return (
-        <Tabs screenOptions={{tabBarActiveTintColor: Colors.default.primary, headerShown: false}}>
+        <Tabs 
+            screenOptions={{
+                tabBarActiveTintColor: "#ffff", 
+                tabBarInactiveTintColor: "#9A97C8",
+                headerShown: false,
+
+                tabBarStyle: {
+                    backgroundColor: Colors.default.primary,
+                    height: "auto"
+                },
+                
+                tabBarLabelStyle: {
+                    fontFamily: fonts.regular,
+                },
+
+                tabBarIconStyle: {
+                    marginTop: 5
+                }
+            }}
+        >
             <Tabs.Screen 
                 name="home"
                 options={{
