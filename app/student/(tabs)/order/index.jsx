@@ -36,7 +36,6 @@ const requests = [
 
 export default function Index() {
 
-
     const renderRequests = ({ item }) => {
         
         return (

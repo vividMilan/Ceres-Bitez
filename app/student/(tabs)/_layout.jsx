@@ -1,4 +1,3 @@
-import { fonts } from "@/constants/fonts";
 import { Colors } from "@/constants/theme";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -15,16 +14,8 @@ export default function StudentTabLayout() {
 
                 tabBarStyle: {
                     backgroundColor: Colors.default.primary,
-                    height: "auto"
-                },
-                
-                tabBarLabelStyle: {
-                    fontFamily: fonts.regular,
-                },
-
-                tabBarIconStyle: {
-                    marginTop: 5
                 }
+                
             }}
         >
             <Tabs.Screen 
