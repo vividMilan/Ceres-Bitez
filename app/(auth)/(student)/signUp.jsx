@@ -2,18 +2,35 @@ import { fonts, fontSizes } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { universities } from "@/data/universities";
+import { auth, db } from "@/firebaseConfig";
+import { supabase } from "@/supabaseConfig";
 import Entypo from '@expo/vector-icons/Entypo';
 import { Picker } from "@react-native-picker/picker";
 import { Checkbox } from 'expo-checkbox';
 import * as ImagePicker from "expo-image-picker";
-import { Link } from "expo-router";
+import { useRouter } from "expo-router";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function signUp() {
 
+    const router = useRouter()
+
     const [isChecked, setChecked] = useState(false)
 
+    
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [mobile, setMobile] = useState("");
+    const [regNo, setRegNo] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [university, setUniversity] = useState("");
+    const [imageUri, setImageUri] = useState(null);
+    const [loading, setLoading] = useState(false);
+    
     const openCamera = async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -23,15 +40,98 @@ export default function signUp() {
         }
 
         const result = await ImagePicker.launchCameraAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            cameraType: ImagePicker.CameraType.back,
             allowsEditing: true,
-            quality: 1,
+            quality: 0.75
         });
 
         if (!result.canceled) {
-            console.log("Image URI:", result.assets[0].uri);
+            setImageUri(result.assets[0].uri)
         }
     };
+
+    const uriToBlob = async (uri) => {
+        const response = await fetch(uri);
+        return await response.blob();
+    };
+
+    const uploadRecordBook = async (uri, uid) => {
+        const response = await fetch(uri)
+        const arrayBuffer = await response.arrayBuffer();
+        const filePath = `${uid}/recordBook.jpg`;
+
+        const { error } = await supabase.storage
+            .from("student-record-books")
+            .upload(filePath, arrayBuffer, {
+                contentType: "image/jpeg",
+                upsert: true,
+            });
+
+        if (error) {
+            console.log("UPLOAD ERROR:", error);
+            throw error;
+        }
+
+        const { data } = supabase.storage
+            .from("student-record-books")
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    };
+
+    const handleSignUp = async () => {
+        if (!isChecked) {
+            alert("Accept term & conditions")
+            return;
+        }
+
+        if (!imageUri) {
+            alert("Upload student recotd book")
+            return
+        }
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match")
+            return
+        }
+
+        try {
+            setLoading(true)
+
+
+            //firebase Auth
+            const userCred = await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            )
+
+            const uid = userCred.user.uid;
+
+            // Upload Image to supabase
+            const recordBookUrl = await uploadRecordBook(imageUri, uid)
+
+            // Save student profile in Firebase
+
+            await setDoc(doc(db, "users", uid), {
+                name,
+                email,
+                mobile,
+                regNo,
+                university,
+                recordBookUrl,
+                role: "student",
+                createdAt: new Date()
+            })
+
+            alert("Account created successfully")
+            router.push("/(auth)/(student)/login")
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <View style={globalStyles.container}>
@@ -41,33 +141,46 @@ export default function signUp() {
                     placeholder="Name with initials"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
+                    value={name}
+                    onChangeText={setName}
                 />
                 <TextInput 
                     placeholder="Student email"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
+                    value={email}
+                    onChangeText={setEmail}
                 />
                 <TextInput 
                     placeholder="Mobile Number"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
+                    value={mobile}
+                    onChangeText={setMobile}
+                    keyboardType="numeric"
                 />
                 <TextInput 
                     placeholder="Student Registration Number"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
+                    value={regNo}
+                    onChangeText={setRegNo}
                 />
                 <TextInput 
                     placeholder="Password"
                     style={globalStyles.input}
                     secureTextEntry={true}
                     placeholderTextColor={Colors.default.inputText}
+                    value={password}
+                    onChangeText={setPassword}
                 />
                 <TextInput 
                     placeholder="Confirm Password"
                     style={globalStyles.input}
                     secureTextEntry={true}
                     placeholderTextColor={Colors.default.inputText}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
                 />
                 <Pressable style={styles.cameraClick} onPress={openCamera}>
                     <Entypo name="camera" size={72} color={Colors.default.inputText}/>
@@ -75,7 +188,10 @@ export default function signUp() {
                 </Pressable>
 
                 <View style={styles.dropDownContainer}>
-                    <Picker>
+                    <Picker
+                        selectedValue={university}
+                        onValueChange={(value) => setUniversity(value)}
+                    >
                         <Picker.Item style={{color: Colors.default.inputText}} label="Select University" value="" />
 
                             {universities.map((item, index) => (
@@ -99,20 +215,21 @@ export default function signUp() {
                 </View>
 
                 <TouchableOpacity
-                    onPress={() => console.log("Login Clicked")}
+                    onPress={handleSignUp}
                     style={[globalStyles.button]}
+                    disabled={loading}
                 >
                     <Text style={[globalStyles.buttonText]}>Sign Up</Text>
                 </TouchableOpacity>
 
 
                 {/* Login Button */}
-                <Link href={"/login"} asChild> 
-                    <Text style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
+                <View> 
+                    <Text onPress={() => router.push("/(auth)/(student)/login")} style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
                         Already have an account ?
                         <Text style={[{color: Colors.default.primary, fontFamily: fonts.semiBold}]}> Login</Text>
                     </Text>
-                </Link>
+                </View>
             </ScrollView>
         </View>
     )

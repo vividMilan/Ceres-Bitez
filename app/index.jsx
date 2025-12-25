@@ -51,6 +51,10 @@ export default function Index() {
         router.navigate("/(auth)/(student)/signUp")
     }
 
+    if(selectedId === "restuarant") {
+        router.navigate("/(auth)/(restuarant)/signUp")
+    }
+
     if(selectedId === "volunteer") {
         router.navigate("/(auth)/(volunteer)/signUp")
     }
@@ -77,7 +81,7 @@ export default function Index() {
           keyExtractor={(item) => item.id}
         />
       <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
-        <Text style={globalStyles.buttonText}>Next </Text>
+        <Text style={globalStyles.buttonText}>Next</Text>
       </TouchableOpacity>
     </View>
   );

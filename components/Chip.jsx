@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginRight: 10,
         fontFamily: fonts.semiBold,
+        flex: 1
     },
     chipText: {
         fontFamily: fonts.semiBold,

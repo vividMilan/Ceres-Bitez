@@ -26,7 +26,7 @@ export const globalStyles = StyleSheet.create({
         paddingVertical: 10,
         marginTop: 25,
         flex: 1,
-        flexDirection: "column"
+        flexDirection: "column",
     },
     button: {
         width: "100%",
@@ -66,5 +66,21 @@ export const globalStyles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center"
+    },
+    flexDisplay: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10
+    },
+    searchBoxRow: {
+        flexDirection: "row",
+        backgroundColor: "#D9D9D9",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 50,
+        gap: 10,
+        marginBottom: 20,
+        alignItems: "center",
     }
 })
