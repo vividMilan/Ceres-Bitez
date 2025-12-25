@@ -3,7 +3,7 @@ import ShopCard from "@/components/shopCard";
 import { globalStyles } from "@/constants/globalStyle";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useState } from "react";
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Text, TextInput, View } from "react-native";
 
 const shopsData = [
   {
@@ -45,12 +45,12 @@ export default function Index() {
         .filter((shop) => shop.shopName.toLowerCase().includes(searchText.toLowerCase()));  
     return (
         <View style={globalStyles.container}>
-            <View style={styles.searchBoxRow}>
+            <View style={globalStyles.searchBoxRow}>
                 <FontAwesome name="search" size={24} color="black" />
                 <TextInput 
                     value={searchText}
                     onChangeText={setSearchText}
-                    style={{color: "grey"}}
+                    style={{color: "grey", width: "100%"}}
                     placeholder="Search for shops or food"
                 />
             </View>
@@ -81,16 +81,3 @@ export default function Index() {
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    searchBoxRow: {
-        flexDirection: "row",
-        backgroundColor: "#D9D9D9",
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        borderRadius: 50,
-        gap: 10,
-        marginBottom: 20,
-        alignItems: "center",
-    }
-})
