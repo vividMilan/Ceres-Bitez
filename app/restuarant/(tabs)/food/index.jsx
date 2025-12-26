@@ -1,10 +1,13 @@
 import { fontSizes } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
+import { db } from "@/firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Picker } from "@react-native-picker/picker";
+import { getAuth } from "firebase/auth";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const preference = [
     "Non-Veg",
@@ -19,6 +22,8 @@ const description = [
 
 
 export default function Index() {
+
+    
 
     const [name, setName] = useState("")
     const [quantity, setQuantity] = useState(null)
@@ -45,6 +50,48 @@ export default function Index() {
             console.log("Image URI:", result.assets[0].uri);
         }
     };
+
+    const handleFoodAdd = async () => {
+        // Logic to handle adding food item
+
+        if (!name || !quantity || !vegNonVeg || !foodPreference) {
+            Alert.alert("Please fill all the fields");
+            return;
+        }
+
+        setLoading(true);
+
+        // Simulate API call
+        try {
+            const auth = getAuth();
+            const user = auth.currentUser
+
+            await addDoc(collection(db, "foods"), {
+                name,
+                quantity,   
+                vegNonVeg,
+                foodPreference,
+                restuarantID: user.uid,
+                createdAt: serverTimestamp(),
+                imageUri: imageUri ?? 
+                "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
+            })
+
+            Alert.alert("Food added successfully");
+
+            // Clear form
+            setName("");
+            setQuantity(null);
+            setVegNonVeg("");
+            setFoodPreference("");
+            setImageUri(null);
+            
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
+    }
         
 
     return (
@@ -107,7 +154,9 @@ export default function Index() {
                 </Picker>
             </View>
 
-
+            <TouchableOpacity onPress={handleFoodAdd} style={[globalStyles.button, {marginTop: "auto"}]}>
+                <Text style={globalStyles.buttonText}>{loading ? "Adding Food..." : "Add Food"}</Text>
+            </TouchableOpacity>
         </View>
     )
 }
