@@ -62,6 +62,10 @@ export default function Index() {
     if(selectedId === "home") {
         router.navigate("home")
     }
+
+    if (selectedId === "ngo") {
+        router.navigate("/(auth)/(NGO)/signUp")
+    }
   };
 
   return (
