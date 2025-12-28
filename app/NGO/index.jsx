@@ -3,6 +3,7 @@ import { globalStyles } from "@/constants/globalStyle";
 import { db } from "@/firebaseConfig";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -13,7 +14,7 @@ export default function index() {
     const [loading, setLoading] = useState(true)
     const [requests, setRequests] = useState([])
 
-    const NGOImage = require("../../assets/images/NGO/image.png")
+    const router = useRouter();
 
 
 useEffect(() => {
@@ -58,6 +59,17 @@ useEffect(() => {
                 <TouchableOpacity 
                     style={styles.shopCard}
                     key={item.id}
+                    onPress={() => router.push({
+                        pathname: "/NGO/requestDetails",
+                        params: {
+                            requestId: item.id,
+                            homeId: item.homeData?.id,
+                            homeName: item.homeData?.name,
+                            homeImage: item.homeData?.image,
+                            homeLocation: item.homeData?.location,
+                            requestDate: item.date
+                        }
+                    })}
                 >
 
                     <Image source={{uri: item.homeData?.image}} style={{width:"100%", height: 200, borderRadius: 5}}/>

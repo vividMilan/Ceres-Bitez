@@ -7,45 +7,12 @@ import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FlatList, Text, TextInput, View } from "react-native";
 
-// const shopsData = [
-//   {
-//     id: "1",
-//     image: require("../../../../assets/images/shops/shop1.png"),
-//     shopName: "Foodie's Hub",
-//     rating: 4.5,
-//     deliveryTime: "30-40 mins",
-//     priceRange: "200-500",
-//     type: "Available",
-//   },
-//   {
-//     id: "2",
-//     image: require("../../../../assets/images/shops/shop2.png"),
-//     shopName: "Hopper Spot",
-//     rating: 4.5,
-//     deliveryTime: "20 mins",
-//     priceRange: "100-200",
-//     type: "Veg",
-//   },
-//   {
-//     id: "3",
-//     image: require("../../../../assets/images/shops/shop3.png"),
-//     shopName: "Spicy Bite",
-//     rating: 4.2,
-//     deliveryTime: "25 mins",
-//     priceRange: "150-250",
-//     type: "Non Veg",
-//   },
-// ];
-
 export default function Index() {
 
     const [selected, setSelected] = useState("All");
     const [searchText, setSearchText] = useState("");
     const [shopData, setShopData] = useState([])
     const [loading, setLoading] = useState(true)
-
-    
-
 
     useEffect(() => {
         const fetchShops = async () => {
