@@ -82,5 +82,23 @@ export const globalStyles = StyleSheet.create({
         gap: 10,
         marginBottom: 20,
         alignItems: "center",
+    },
+    cameraClick: {
+        height: 300,
+        width: "100%",
+        backgroundColor: Colors.default.greyBackground,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 10,
+        borderRadius: 50,
+        marginBottom: 20
+    },
+    dropDownContainer: {
+        width: "100%",
+        backgroundColor: Colors.default.greyBackground,
+        borderRadius: 50,
+        marginBottom: 20,
+        paddingInline: 10
     }
 })

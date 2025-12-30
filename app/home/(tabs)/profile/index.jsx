@@ -1,11 +1,10 @@
 import { globalStyles } from "@/constants/globalStyle";
-import { Colors } from "@/constants/theme";
 import { Text, View } from "react-native";
 
-export default function HomeIndex() {
+export default function index() {
     return (
         <View style={globalStyles.container}>
-            <Text style={{color: Colors.default.primary}}>Home Page</Text>
+            <Text style={globalStyles.titleText}>Profile</Text>
         </View>
     )
 }

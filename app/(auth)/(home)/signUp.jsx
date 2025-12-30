@@ -1,13 +1,16 @@
+import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { Picker } from "@react-native-picker/picker";
 import Checkbox from "expo-checkbox/build/ExpoCheckbox";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function signUp() {
 
     const [isChecked, setChecked] = useState(false)
+    const router = useRouter()
 
     return (
         <View style={globalStyles.container}>
@@ -56,6 +59,12 @@ export default function signUp() {
             </View>
             <View style={[globalStyles.button, {marginTop: "auto"}]}>
                 <Text style={globalStyles.buttonText}>Sign Up</Text>
+            </View>
+            <View> 
+                <Text onPress={() => router.push("/(auth)/(home)/login")} style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
+                    Already have an account ?
+                    <Text style={[{color: Colors.default.primary, fontFamily: fonts.semiBold}]}> Login</Text>
+                </Text>
             </View>
         </View>
     )
