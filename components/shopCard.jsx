@@ -4,14 +4,26 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function ShopCard({image, shopName, rating, deliveryTIme, priceRange}) {
+export default function ShopCard({id, image, shopName, rating, deliveryTime, priceRange}) {
 
     const router = useRouter()
 
     return (
-        <TouchableOpacity style={styles.shopCard} onPress={() => router.navigate("/student/home/shopPage")}>
+        <TouchableOpacity 
+            style={styles.shopCard} 
+            onPress={() => 
+                    router.push({
+                        pathname: "/student/home/shopPage",
+                        params: {
+                            shopId: id,
+                            shopName,
+                            image
+                        }
+                    })
+            }
+        >
 
-            <Image source={image} style={{width:"100%", height: 200, borderRadius: 5}}/>
+            <Image source={{uri: image}} style={{width:"100%", height: 200, borderRadius: 5}}/>
 
             <View style={styles.title}>
                 <Text style={styles.shopName}>{shopName}</Text>
@@ -27,7 +39,7 @@ export default function ShopCard({image, shopName, rating, deliveryTIme, priceRa
                     <Text style={{color: "black", fontFamily: fonts.semiBold}}>{rating}</Text>
                 </View>
                 <View>
-                    <Text style={{color: "#565556D"}}>{deliveryTIme}</Text>
+                    <Text style={{color: "#565556D"}}>{deliveryTime}</Text>
                 </View>
                 </View>
             <Text>Rs. {priceRange}</Text>
