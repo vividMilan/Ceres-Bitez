@@ -56,7 +56,7 @@ export default function Index() {
     }
 
     if(selectedId === "volunteer") {
-        router.navigate("/(auth)/(volunteer)/signUp")
+        router.navigate("/volunteer")
     }
 
     if(selectedId === "home") {
