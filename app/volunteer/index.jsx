@@ -7,7 +7,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from "expo-location";
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Polyline } from "react-native-maps";
+import MapView, { Marker, Polyline } from "react-native-maps";
 
     export default function index() {
 
@@ -16,6 +16,8 @@ import MapView, { Polyline } from "react-native-maps";
         const [currentRegion, setCurrentRegion] = useState(null);
         const [currentLocation, setCurrentLocation] = useState(null)
         const [distance, setDistance] = useState(null)
+
+        const fakeGPS = useRef(null)
         
         const [request, setRequest] = useState(
             {
@@ -55,17 +57,65 @@ import MapView, { Polyline } from "react-native-maps";
         const [showRequestCard, setShowRequestCard] = useState(true)
         const [loading, setLoading] = useState(false)
 
+        const navigate = (request) => {
+            setLoading(true)
+            if (!currentLocation) return
+
+            if (request.status === "accepted") {
+                getRoute(currentLocation, request.shop.coords)
+                console.log("accepted")
+            }
+
+            if (request.status === "picked-up") {
+                getRoute(currentLocation, request.destination.coords)
+                console.log("picked-Up")
+            }
+        }
+
+        const getCurrentLocation = async () => {
+            try {
+                const {status} = await Location.requestForegroundPermissionsAsync()
+
+                if (status !== "granted") {
+                    Alert.alert("Location Permission is Required")
+                    return
+                }
+
+                const location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Highest
+                })
+
+                const {latitude, longitude} = location.coords
+
+                const region = {
+                    latitude: latitude,
+                    longitude: longitude,
+                    latitudeDelta: 0.2,
+                    longitudeDelta: 0.2
+                }
+
+                setCurrentLocation(region)
+                setCurrentLocation({latitude, longitude})
+
+                mapRef.current?.animateToRegion(region, 1000)
+
+
+            } catch (error) {
+                console.log(error.message)
+            }
+        }
 
         const getRoute = async (start, end) => {
             const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY
-
             try {
                 const url = `https://api.geoapify.com/v1/routing?waypoints=${start.latitude},${start.longitude}|${end.latitude},${end.longitude}&mode=drive&apiKey=${apiKey}`
+
                 const response = await fetch(url)
+
                 const data = await response.json()
 
+                const distance = data.features[0].properties.distance
 
-                const distance = data.features[0].properties.distance;
                 setDistance(distance)
 
                 const route = data.features[0].geometry.coordinates[0].map(
@@ -80,55 +130,81 @@ import MapView, { Polyline } from "react-native-maps";
                     edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
                     animated: true,
                 })
+
             } catch (error) {
-                console.log(error)
+                console.log(error.message)
             }
         }
 
+        const isNear = (a, b, threshold = 0.0005) => {
+            if (!a || !b) return false
 
-        const getCurrentLocation = async () => {
-            const { status } = await Location.requestForegroundPermissionsAsync();
-
-            if (status !== "granted") {
-                Alert.alert("Location Permission Denied")
-                return;
-            }
-
-            const location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.High
-            })
-
-            const {latitude, longitude} = location.coords
-
-            const region = {
-                latitude,
-                longitude,
-                latitudeDelta: 0.01,
-                longitudeDelta: 0.01
-            }
-
-            setCurrentRegion(region)
-            setCurrentLocation({latitude, longitude})
-
-            mapRef.current?.animateToRegion(region, 1000)
+            return (
+                Math.abs(a.latitude - b.latitude) < threshold &&
+                Math.abs(a.longitude - b.longitude) < threshold
+            )
         }
 
-        const navigate = (request) => {
-            setLoading(true)
-            if (!currentLocation) return
+        const simulateRider = () => {
 
-            if (request.status === "pending") {
-                getRoute(currentLocation, request.shop.coords)
-            }
+            let index = 0
 
-            else if (request.status === "accepted") {
-                getRoute(currentLocation, request.destination.coords)
+            fakeGPS.current = setInterval(() => {
+                if (index >= routeCoords.length) {
+                    clearInterval(fakeGPS.current)
+                    return
+                }
+
+                const point = routeCoords[index]
+                setCurrentLocation(point)
+
+
+                mapRef.current?.animateToRegion({
+                    ...point,
+                    latitudeDelta: 0.1,
+                    longitudeDelta: 0.1
+                }, 500)
+
+                index++
+            }, 200)
+        }
+
+        const stopFakeTracking = () => {
+            if (fakeGPS.current) {
+                clearInterval(fakeGPS.current)
+                fakeGPS.current = null
             }
         }
 
         useEffect(() => {
             getCurrentLocation()
         }, [])
+
+        useEffect(() => {
+            if (routeCoords.length > 0) {
+                simulateRider()
+            }
+
+            return () => stopFakeTracking()
+        }, [routeCoords])
+
+
+        useEffect(() => {
+            if (!distance) return
+
+            if (request.status === "accepted" && isNear(currentLocation, request.shop.coords)) {
+                Alert.alert("Picked Up")
+                const updated = { ...request, status: "picked-up" }
+                setRequest(updated)
+                navigate(updated)
+            }
+
+            if (request.status === "picked-up" && isNear(currentLocation, request.destination.coords)) {
+                Alert.alert("Delivery Completed")
+                setRequest({ ...request, status: "completed" })
+                setRouteCoords([])
+            }   
+        }, [currentLocation])
 
 
         return (
@@ -137,8 +213,7 @@ import MapView, { Polyline } from "react-native-maps";
                     ref={mapRef}
                     region={currentRegion}
                     style={StyleSheet.absoluteFillObject}
-                    showsUserLocation={true}
-                    followsUserLocation={true}
+                    showsUserLocation
                 >
                     {routeCoords.length > 0 && (
                         <Polyline 
@@ -147,16 +222,28 @@ import MapView, { Polyline } from "react-native-maps";
                             strokeColor='blue'
                         />
                     )}
+
+                    {currentLocation && (
+                        <Marker 
+                            coordinate={currentLocation}
+                        />
+                    )}
                 </MapView>
-                {showRequestCard && (
-                    <View>
-                        <View style={{position: "absolute", flexDirection: "row"}}>
-                            <Text>{request.name}</Text>
-                            <FontAwesome6 name="graduation-cap" size={24} color="black" />
-                            <View>
-                                <View style={{display: "flex", justifyContent: "flex-end"}}>
+                {(showRequestCard && (request.status === "pending")) && (
+                    <View style={styles.cardContainer}>
+                        <View style={styles.orderCard}>
+
+                            <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                                <View style={globalStyles.flexDisplay}>
+                                    <Text>{request.name}</Text>
+                                    <FontAwesome6 name="graduation-cap" size={24} color="black" />
+                                </View>
+                                <View>
                                     <AntDesign onPress={() => setShowRequestCard(false)} name="close" size={24} color="black" />
                                 </View>
+                            </View>
+
+                            <View>
                                 <View style={globalStyles.flexDisplay}>
                                     <AntDesign name="shop" size={24} color="black" />
                                     <Text>{request.shop.name}</Text>
@@ -174,7 +261,7 @@ import MapView, { Polyline } from "react-native-maps";
                                     ...request,
                                     status: "accepted"
                                 }
-                                setRequest(updatedRequest) 
+                                setRequest(updatedRequest)
                                 navigate(updatedRequest)
                             }}>
                                 <Text style={globalStyles.buttonText}>Accept</Text>
@@ -229,5 +316,18 @@ import MapView, { Polyline } from "react-native-maps";
             transform: [{ translateX: "-50%" }],
             backgroundColor: "red",
             borderRadius: 100,
+        },
+        cardContainer: {
+            position: "absolute",
+            zIndex: 100,
+            bottom: 20,
+            width: "90%",
+            alignSelf: "center"
+        },
+        orderCard: {
+            backgroundColor: "#ffffffe2",
+            gap: 12,
+            padding: 15,
+            borderRadius: 12
         }
     })
