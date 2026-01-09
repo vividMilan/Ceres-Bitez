@@ -4,34 +4,86 @@ import { fonts } from '@/constants/fonts';
 import { globalStyles } from '@/constants/globalStyle';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useRouter } from 'expo-router';
+import * as Location from "expo-location";
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const orderDetail = [
-    {
-        shopName: "Spicy Hut",
-        order: [
-            {
-                name: "Rice & Curry",
-                qty: 5
-            }
-        ]
-    },
-    {
-        shopName: "Sweet Cones",
-        order: [
-            {
-                name: "Vanilla Ice Cream",
-                qty: 1
-            }
-        ]
-    }
-]
 
 export default function OrderSummery() {
+    
+    const {shopName, order} = useLocalSearchParams()
+    
+    const parsedOrder = order ? JSON.parse(order) : []
+    
+    const [location, setLocation] = useState(null)
+    const [loading, setLoading] = useState(false)
+    const [address, setAddress] = useState("")
+    const [city, setCity] = useState("")
+    const [request, setRequest] = useState([])
+    
+    const orderDetail = [
+        {
+            shopName,
+            order: parsedOrder    
+        }
+    ]
+    
+   
+    const urlBuilder = (latitude, longitude) => {
+        return (`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`)
+    }
+
+    const fetchAddress = async (latitude, longitude) => {
+        try {
+            const url = urlBuilder(latitude, longitude)
+            const response = await fetch(url)
+            const data = await response.json()
+
+            const name = data.results[0].name ?? data.results[0].street
+            const suburb = data.results[0].suburb
+
+            setAddress(name)
+            setCity(suburb)
+
+            console.log(name)
+            console.log(`City: ${suburb}`)
+            
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getCurrentLocation = async () => {
+        try {
+            setLoading(true)
+            const { status } = await Location.requestForegroundPermissionsAsync()
+
+            if (status !== "granted") {
+                return
+            }
+
+            const fetchedLocation = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High
+            })
+
+            const {latitude, longitude} = fetchedLocation.coords
+
+            fetchAddress(latitude, longitude)
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        getCurrentLocation()
+        setRequest(orderDetail)
+    }, [])
 
     const router = useRouter()
-
     return (
         <View style={globalStyles.container}>
             <ScrollView stickyHeaderIndices={[0]} >
@@ -45,8 +97,16 @@ export default function OrderSummery() {
                             <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
                                 <FontAwesome6 name="location-dot" size={36} color="black" />
                                 <View>
-                                    <Text style={{fontFamily: fonts.regular}}>5/3, Kirimandala Mw</Text>
-                                    <Text style={{fontFamily: fonts.regular}}>Narahenpita</Text>
+                                    {
+                                        address && city ? (
+                                            <>
+                                                <Text style={{fontFamily: fonts.regular}}>{address}</Text>
+                                                <Text style={{fontFamily: fonts.regular}}>{city}</Text>
+                                            </>
+                                        ): (
+                                            <Text>Loading....</Text>
+                                        )
+                                    }
                                 </View>
                             </View>
 
@@ -54,7 +114,7 @@ export default function OrderSummery() {
                         </TouchableOpacity>
                     </View>
                     <View>
-                        {orderDetail.map((orderDetail, index) => (
+                        {request.map((orderDetail, index) => (
                             <Accordian 
                                 key={index}
                                 shopName={orderDetail.shopName}
@@ -80,7 +140,17 @@ export default function OrderSummery() {
 
                 </View>
             </ScrollView>
-            <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]} onPress={() => router.navigate("/student/(tabs)/home/checkout")}>
+            <TouchableOpacity 
+                style={[globalStyles.button, {marginTop: "auto"}]} 
+                onPress={() => 
+                    router.push({
+                       pathname: "/student/(tabs)/home/checkout",
+                       params: {
+                        request: JSON.stringify(request)
+                       } 
+                    })
+                }
+            >
                 <Text style={globalStyles.buttonText}>Next</Text>
             </TouchableOpacity>
         </View>

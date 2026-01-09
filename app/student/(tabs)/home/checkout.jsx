@@ -2,7 +2,10 @@ import PageTitleWithBackButton from "@/components/PageTitleWithBackButton";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
+import { db } from "@/firebaseConfig";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import { useLocalSearchParams } from "expo-router";
+import { addDoc, collection } from "firebase/firestore";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
@@ -24,7 +27,39 @@ const paymentMethods = [
 
 export default function CheckOut() {
 
+    const { request } = useLocalSearchParams()
+
+    const parsedRequest = JSON.parse(request)
+
+    const [paymentMethod, setPaymentMethod] = useState("")
+    const [finalRequest, setFinalRequest] = useState({})
+    const [loading, setLoading] = useState(false)
+
+    setFinalRequest(parsedRequest)
+
     const [isSelected, setIsSelected] = useState("")
+
+    const handleRequestFood = async () => {
+        try {
+            setLoading(true)
+
+            // const auth = getAuth()
+            // const user = auth.currentUser
+
+            const request = {
+                ...finalRequest,
+                payement: paymentMethod,
+                studentID: "asdfasdfasdfasdfasdf"
+            }
+
+            await addDoc(collection(db), "requests", request)
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <View style={[globalStyles.container]}>
@@ -67,13 +102,13 @@ export default function CheckOut() {
                     Payment Method
                 </Text>
                 <View style={{flexDirection: "row", gap: 10}}>
-                    <TouchableOpacity style={{display: "flex", gap: 5, alignItems: "center", borderColor: Colors.default.primary, borderWidth: 2, width: 120, height: 100, justifyContent: "center", borderRadius: 10, backgroundColor: isSelected == "visa" ? "rgba(102, 80, 164, 0.20)" : "transparent" }} onPress={() => setIsSelected("visa")}>
+                    <TouchableOpacity onPressIn={() => setPaymentMethod("visa")} style={{display: "flex", gap: 5, alignItems: "center", borderColor: Colors.default.primary, borderWidth: 2, width: 120, height: 100, justifyContent: "center", borderRadius: 10, backgroundColor: isSelected == "visa" ? "rgba(102, 80, 164, 0.20)" : "transparent" }} onPress={() => setIsSelected("visa")}>
                         <FontAwesome6 name="cc-visa" size={32} color="#1A1F71" />
                         <Text style={globalStyles.regularText}>
                             xxx945
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{display: "flex", gap: 5, alignItems: "center", borderColor: Colors.default.primary, borderWidth: 2, width: 120, height: 100, justifyContent: "center", borderRadius: 10, backgroundColor: isSelected === "mc" ? "rgba(102, 80, 164, 0.20)" : "transparent" }} onPress={() => setIsSelected("mc")}>
+                    <TouchableOpacity onPressIn={() => setPaymentMethod("mastercard")} style={{display: "flex", gap: 5, alignItems: "center", borderColor: Colors.default.primary, borderWidth: 2, width: 120, height: 100, justifyContent: "center", borderRadius: 10, backgroundColor: isSelected === "mc" ? "rgba(102, 80, 164, 0.20)" : "transparent" }} onPress={() => setIsSelected("mc")}>
                         <FontAwesome6 name="cc-mastercard" size={32} color="#EB001B" />
                         <Text style={globalStyles.regularText}>
                             xxx945
@@ -82,8 +117,8 @@ export default function CheckOut() {
                 </View>
             </View>
 
-            <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]}>
-                <Text style={globalStyles.buttonText}>Request Food</Text>
+            <TouchableOpacity onPress={handleRequestFood} style={[globalStyles.button, {marginTop: "auto"}]}>
+                <Text style={globalStyles.buttonText}>{loading ? "Requesting" : "Request Food"}</Text>
             </TouchableOpacity>
         </View>
     )

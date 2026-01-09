@@ -29,6 +29,7 @@ export default function ShopPage() {
             [id]: Math.max((prev[id] || 0) - 1, 0)
         }));
     };
+    
     const router = useRouter()
 
     useEffect(() => {
@@ -56,6 +57,15 @@ export default function ShopPage() {
         fetchMenu()
     }, [shopId])
 
+    const selectedItems = menu
+        .filter(item => (qtyMap[item.id] || 0) > 0)
+        .map(item => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            qty: qtyMap[item.id]
+        }))
+
     return (
 
         <>
@@ -78,7 +88,7 @@ export default function ShopPage() {
                         </View>
                         <View style={{display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8}}>
                             <FontAwesome name="minus-circle" size={32} color="black" onPress={() => decreaseQty(item.id)} />
-                            <Text style={{fontSize: 20}}>{qtyMap[item.id || 0]}</Text>
+                            <Text style={{fontSize: 20}}>{qtyMap[item.id] || 0}</Text>
                             <FontAwesome name="plus-circle" size={32} color="black" onPress={() => increaseQty(item.id)}/>
                         </View>
                     </View>
@@ -87,7 +97,19 @@ export default function ShopPage() {
                 
 
 
-                <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]} onPress={() => router.navigate("/student/home/OrderSummery")}>
+                <TouchableOpacity 
+                    style={[globalStyles.button, {marginTop: "auto"}]} 
+                    onPress={() => 
+                        router.push({
+                            pathname: "/student/home/OrderSummery",
+                            params: {
+                                shopId,
+                                shopName,
+                                order: JSON.stringify(selectedItems)
+                            }
+                        })
+                    }
+                >
                     <Text style={globalStyles.buttonText}>Next</Text>
                 </TouchableOpacity>
                 
