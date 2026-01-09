@@ -17,7 +17,7 @@ export default function request() {
             <View style={[globalStyles.flexDisplay, {marginBottom: 20}]}>
                 <Image 
                     source={student_pic}
-                    style={{width: 60, height: 60, borderRadius: "50%"}}
+                    style={{width: 60, height: 60, borderRadius: 50}}
                 />
                 <Text style={[{fontSize: 20, fontFamily: fonts.semiBold}]}>
                     D. Dilshan
