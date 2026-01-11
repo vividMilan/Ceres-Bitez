@@ -5,9 +5,9 @@ import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useLocalSearchParams } from "expo-router";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, serverTimestamp } from "firebase/firestore";
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 
 const paymentMethods = [
@@ -21,38 +21,59 @@ const paymentMethods = [
         cardNo: "xxxx8779",
         icon: <FontAwesome6 name="cc-mastercard" size={32} color="#EB001B" />
     }
-
 ]
 
 
 export default function CheckOut() {
 
-    const { request } = useLocalSearchParams()
+    const { shopId, shopName, location, request} = useLocalSearchParams()
 
-    const parsedRequest = JSON.parse(request)
+    const parsedRequest = JSON.parse(request) || []
+    const parsedLocation = JSON.parse(location) || []
 
     const [paymentMethod, setPaymentMethod] = useState("")
     const [finalRequest, setFinalRequest] = useState({})
     const [loading, setLoading] = useState(false)
 
-    setFinalRequest(parsedRequest)
-
     const [isSelected, setIsSelected] = useState("")
 
+    
     const handleRequestFood = async () => {
         try {
+
+            const studentId = "exampleStudent1234"
             setLoading(true)
 
-            // const auth = getAuth()
-            // const user = auth.currentUser
+            const restaurantRef = doc(db, "restaurants", shopId);
+            const restaurantSnap = await getDoc(restaurantRef);
+            const restaurantData = restaurantSnap.data()
 
-            const request = {
-                ...finalRequest,
-                payement: paymentMethod,
-                studentID: "asdfasdfasdfasdfasdf"
+            const requestData = {
+                student: {
+                    studentId,
+                    studentName: "A. Ashen",
+                    location: {
+                        latitude: parsedLocation.latitude,
+                        longitude: parsedLocation.longitude
+                    }
+                },
+                restuarant: {
+                    restuarantId: shopId,
+                    restuarantName: shopName,
+                    location: {
+                        latitude: restaurantData.location.latitude,
+                        longitude: restaurantData.location.longitude
+                    },
+                },
+                foodItems: parsedRequest,
+                paymentMethod: paymentMethod,
+                status: "pending",
+                createdAt: serverTimestamp()
             }
 
-            await addDoc(collection(db), "requests", request)
+            await addDoc(collection(db, "studentRequests"), requestData)
+            
+            Alert.alert("Successfuly Requested")
 
         } catch (error) {
             console.log(error)
@@ -60,6 +81,7 @@ export default function CheckOut() {
             setLoading(false)
         }
     }
+
 
     return (
         <View style={[globalStyles.container]}>
@@ -70,31 +92,15 @@ export default function CheckOut() {
                 <Text style={{fontFamily: fonts.semiBold, fontSize: 20}}>
                     Order Details
                 </Text>
-                <View style={{display: "flex", flexDirection: "column", gap: 8, backgroundColor: "#EBEBEB", padding: 10, borderRadius: 5}}>    
-                    <View>
-                        <View style={globalStyles.spaceBetween}>
-                            <Text style={globalStyles.regularText}>Fish Rice & Curry</Text>
-                            <Text style={globalStyles.regularText}>150.00</Text>
+                <View style={{display: "flex", flexDirection: "column", gap: 8, backgroundColor: "#EBEBEB", padding: 10, borderRadius: 5}}>
+                    {parsedRequest.map((item) => (
+                        <View key={item.id}>
+                            <View style={globalStyles.spaceBetween}>
+                                <Text style={globalStyles.regularText}>{item.name}</Text>
+                                <Text style={globalStyles.regularText}>{(item.price * item.qty).toFixed(2)}</Text>
+                            </View>
                         </View>
-                    </View>
-                    <View>
-                        <View style={globalStyles.spaceBetween}>
-                            <Text style={globalStyles.regularText}>Egg Hoppers</Text>
-                            <Text style={globalStyles.regularText}>200.00</Text>
-                        </View>
-                    </View>
-                    <View>
-                        <View style={globalStyles.spaceBetween}>
-                            <Text style={globalStyles.regularText}>Sub Total</Text>
-                            <Text style={globalStyles.regularText}>150.00</Text>
-                        </View>
-                    </View>
-                    <View>
-                        <View style={globalStyles.spaceBetween}>
-                            <Text style={{fontFamily: fonts.semiBold}}>Total</Text>
-                            <Text style={{fontFamily: fonts.semiBold}}>150.00</Text>
-                        </View>
-                    </View>
+                    ))}
                 </View>
             </View>
             <View style={{display: "flex", gap: 10, marginBottom: 10}}>

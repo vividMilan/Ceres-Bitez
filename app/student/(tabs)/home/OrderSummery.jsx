@@ -1,4 +1,3 @@
-import Accordian from '@/components/Accordian';
 import PageTitleWithBackButton from '@/components/PageTitleWithBackButton';
 import { fonts } from '@/constants/fonts';
 import { globalStyles } from '@/constants/globalStyle';
@@ -12,22 +11,15 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-nati
 
 export default function OrderSummery() {
     
-    const {shopName, order} = useLocalSearchParams()
+    const {shopId, shopName, selectedItems} = useLocalSearchParams()
     
-    const parsedOrder = order ? JSON.parse(order) : []
+    const parsedSelectedItems = JSON.parse(selectedItems) || []
     
     const [location, setLocation] = useState(null)
     const [loading, setLoading] = useState(false)
     const [address, setAddress] = useState("")
     const [city, setCity] = useState("")
-    const [request, setRequest] = useState([])
-    
-    const orderDetail = [
-        {
-            shopName,
-            order: parsedOrder    
-        }
-    ]
+    const [canPress, setCanPress] = useState(false)
     
    
     const urlBuilder = (latitude, longitude) => {
@@ -70,6 +62,8 @@ export default function OrderSummery() {
             const {latitude, longitude} = fetchedLocation.coords
 
             fetchAddress(latitude, longitude)
+            setLocation({latitude, longitude})
+            setCanPress(true)
 
         } catch (error) {
             console.log(error)
@@ -80,7 +74,6 @@ export default function OrderSummery() {
 
     useEffect(() => {
         getCurrentLocation()
-        setRequest(orderDetail)
     }, [])
 
     const router = useRouter()
@@ -114,39 +107,37 @@ export default function OrderSummery() {
                         </TouchableOpacity>
                     </View>
                     <View>
-                        {request.map((orderDetail, index) => (
-                            <Accordian 
+                        {/* {parsedSelectedItems.map((orderDetail, index) => (
+                            <Accordian
                                 key={index}
-                                shopName={orderDetail.shopName}
-                                orders={orderDetail.order}
+                                shopName={shopName}
+                                orders={orderDetail}
                             />
-                        ))}
+                        ))} */}
                     </View>
                     <View style={{marginBottom: 20}}>
                         <Text style={[globalStyles.subTitleText]}>Price</Text>
-                        <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-                            <Text style={{fontSize: 20, fontFamily: fonts.regular}}>Fish Rice & Curry</Text>
-                            <Text style={{fontSize: 20, fontFamily: fonts.regular}}>150.00</Text>
-                        </View>
-                        <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-                            <Text style={{fontSize: 20, fontFamily: fonts.regular}}>Egg Hoppers</Text>
-                            <Text style={{fontSize: 20, fontFamily: fonts.regular}}>200.00</Text>
-                        </View>
-                        <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-                            <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>Total</Text>
-                            <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>150.00</Text>
-                        </View>
+                        {parsedSelectedItems.map((item, index) => (
+                            <View key={index} style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                                <Text style={{fontSize: 20, fontFamily: fonts.regular}}>{item.name}</Text>
+                                <Text style={{fontSize: 20, fontFamily: fonts.regular}}>Rs.{item.price * item.qty}</Text>
+                            </View>
+                        ))}
                     </View>
 
                 </View>
             </ScrollView>
             <TouchableOpacity 
+                disabled={!canPress}
                 style={[globalStyles.button, {marginTop: "auto"}]} 
                 onPress={() => 
                     router.push({
                        pathname: "/student/(tabs)/home/checkout",
                        params: {
-                        request: JSON.stringify(request)
+                        shopId,
+                        shopName,
+                        location: JSON.stringify(location),
+                        request: JSON.stringify(parsedSelectedItems),
                        } 
                     })
                 }
