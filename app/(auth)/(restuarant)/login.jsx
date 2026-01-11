@@ -1,9 +1,7 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { auth } from "@/firebaseConfig";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -19,14 +17,14 @@ export default function login() {
     const handleLogin = async () => {
         // Handle login logic here
 
-        if (!username || !pwd) {
-            setError("Please fill in all fields");
-            return;
-        }
+        // if (!username || !pwd) {
+        //     setError("Please fill in all fields");
+        //     return;
+        // }
 
         try {
             setLoading(true);
-            await signInWithEmailAndPassword(auth, username, pwd)
+            // await signInWithEmailAndPassword(auth, username, pwd)
             router.push("/restuarant/")
         } catch (err) {
             Alert.alert(err)
