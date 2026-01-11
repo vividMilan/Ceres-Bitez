@@ -51,7 +51,7 @@ export default function signUp() {
             const uid = userCred.user.uid
 
 
-            await setDoc(doc(db, "users", uid), {
+            await setDoc(doc(db, "restaurants", uid), {
                 name,
                 email, 
                 mobile,

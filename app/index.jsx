@@ -61,11 +61,15 @@ export default function Index() {
     }
 
     if(selectedId === "volunteer") {
-        router.navigate("/(auth)/(volunteer)/signUp")
+        router.navigate("/volunteer")
     }
 
     if(selectedId === "home") {
-        router.navigate("home")
+        router.navigate("/(auth)/(home)/signUp")
+    }
+
+    if (selectedId === "ngo") {
+        router.navigate("/(auth)/(NGO)/signUp")
     }
   };
 

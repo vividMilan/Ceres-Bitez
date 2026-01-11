@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function signUp() {
 
@@ -182,12 +182,12 @@ export default function signUp() {
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                 />
-                <Pressable style={styles.cameraClick} onPress={openCamera}>
+                <Pressable style={globalStyles.cameraClick} onPress={openCamera}>
                     <Entypo name="camera" size={72} color={Colors.default.inputText}/>
                     <Text style={{fontSize: fontSizes.regular, color: Colors.default.inputText}}>Student Record Book</Text>
                 </Pressable>
 
-                <View style={styles.dropDownContainer}>
+                <View style={globalStyles.dropDownContainer}>
                     <Picker
                         selectedValue={university}
                         onValueChange={(value) => setUniversity(value)}
@@ -234,24 +234,3 @@ export default function signUp() {
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    cameraClick: {
-        height: 300,
-        width: "100%",
-        backgroundColor: Colors.default.greyBackground,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 10,
-        borderRadius: 50,
-        marginBottom: 20
-    },
-    dropDownContainer: {
-        width: "100%",
-        backgroundColor: Colors.default.greyBackground,
-        borderRadius: 50,
-        marginBottom: 20,
-        paddingInline: 10
-    }
-})

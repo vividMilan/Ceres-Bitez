@@ -9,6 +9,12 @@ import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useState } from "react";
 import { Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Entypo from "@expo/vector-icons/Entypo";
+import { Picker } from "@react-native-picker/picker";
+import { getAuth } from "firebase/auth";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useState } from "react";
+import { Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const preference = [
     "Non-Veg",
@@ -16,6 +22,8 @@ const preference = [
 ]
 
 export default function Index() {
+
+    
 
     const [name, setName] = useState("")
     const [quantity, setQuantity] = useState(null)
@@ -214,8 +222,25 @@ export default function Index() {
                 </Picker>
             </View>
 
-            <TouchableOpacity onPress={handleAddFood} style={[globalStyles.button, {marginTop: "auto"}]}>
-              <Text style={globalStyles.buttonText}>{loading ? "Loading ..." : "Add Food"}</Text>  
+            <View style={styles.dropDownContainer}>
+                <Picker
+                    selectedValue={foodPreference}
+                    onValueChange={(value) => setFoodPreference(value)}
+                >
+                    <Picker.Item style={{color: Colors.default.inputText}} label="Preference" value="" />
+
+                        {description.map((item, index) => (
+                            <Picker.Item
+                                key={index}
+                                label={item}
+                                value={item}
+                            />
+                        ))}
+                </Picker>
+            </View>
+
+            <TouchableOpacity onPress={handleFoodAdd} style={[globalStyles.button, {marginTop: "auto"}]}>
+                <Text style={globalStyles.buttonText}>{loading ? "Adding Food..." : "Add Food"}</Text>
             </TouchableOpacity>
         </View>
     )
