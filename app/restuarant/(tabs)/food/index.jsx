@@ -8,13 +8,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import Entypo from "@expo/vector-icons/Entypo";
-import { Picker } from "@react-native-picker/picker";
-import { getAuth } from "firebase/auth";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const preference = [
     "Non-Veg",
@@ -82,7 +76,7 @@ export default function Index() {
                     onPress: openCamera
                 },
                 {
-                    text: "Gallery",setQuantity,
+                    text: "Gallery",
                     onPress: openGallery
                 },
                 {
@@ -189,7 +183,7 @@ export default function Index() {
                 keyboardType="numeric"
             />
 
-            <Pressable style={styles.cameraClick} onPress={selectImage}>
+            <Pressable onPress={selectImage}>
 
                 {imageUri ? 
                 
@@ -205,7 +199,7 @@ export default function Index() {
             </Pressable>
 
 
-            <View style={styles.dropDownContainer}>
+            <View>
                 <Picker
                     selectedValue={vegNonVeg}
                     onValueChange={(value) => setVegNonVeg(value)}
@@ -222,47 +216,10 @@ export default function Index() {
                 </Picker>
             </View>
 
-            <View style={styles.dropDownContainer}>
-                <Picker
-                    selectedValue={foodPreference}
-                    onValueChange={(value) => setFoodPreference(value)}
-                >
-                    <Picker.Item style={{color: Colors.default.inputText}} label="Preference" value="" />
-
-                        {description.map((item, index) => (
-                            <Picker.Item
-                                key={index}
-                                label={item}
-                                value={item}
-                            />
-                        ))}
-                </Picker>
-            </View>
-
-            <TouchableOpacity onPress={handleFoodAdd} style={[globalStyles.button, {marginTop: "auto"}]}>
+            <TouchableOpacity onPress={handleAddFood} style={[globalStyles.button, {marginTop: "auto"}]}>
                 <Text style={globalStyles.buttonText}>{loading ? "Adding Food..." : "Add Food"}</Text>
             </TouchableOpacity>
         </View>
     )
 }
 
-const styles = StyleSheet.create({
-    cameraClick: {
-        height: 300,
-        width: "100%",
-        backgroundColor: Colors.default.greyBackground,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 10,
-        borderRadius: 50,
-        marginBottom: 20
-    },
-    dropDownContainer: {
-        width: "100%",
-        backgroundColor: Colors.default.greyBackground,
-        borderRadius: 50,
-        marginBottom: 20,
-        paddingInline: 10
-    }
-})

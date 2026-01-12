@@ -38,7 +38,7 @@ export default function Index() {
   const router = useRouter()
 
   useEffect(() => {
-    router.navigate("/restuarant/(tabs)/food/")
+    router.navigate("/restuarant/(tabs)/home/")
   }, [])
 
   // State to keep track of the selected item
