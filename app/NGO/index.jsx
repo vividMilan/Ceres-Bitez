@@ -1,5 +1,6 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
+import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -67,12 +68,12 @@ useEffect(() => {
                             homeName: item.homeData?.name,
                             homeImage: item.homeData?.image,
                             homeLocation: item.homeData?.location,
-                            requestDate: item.date
+                            requestDate: item.date?.toDate().getTime().toString()
                         }
                     })}
                 >
 
-                    <Image source={{uri: item.homeData?.image}} style={{width:"100%", height: 200, borderRadius: 5}}/>
+                    <Image source={{uri: item.homeData?.image}} style={styles.image}/>
 
                     <View style={styles.title}>
                         <Text style={styles.shopName}>{item.homeData?.name}</Text>
@@ -80,11 +81,11 @@ useEffect(() => {
                     <View style={styles.ratingRow}>
                         <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
                             <Entypo name="location-pin" size={16} color="black" />
-                            <Text style={{color: "black", fontFamily: fonts.semiBold}}>{item.homeData?.location}</Text>
+                            <Text style={{color: "black", fontFamily: fonts.medium}}>{item.homeData?.location}</Text>
                         </View>
-                        <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
+                        <View style={{flexDirection: "row", alignItems: "center", gap: 2, marginLeft: 15}}>
                             <Entypo name="calendar" size={16} color="black" />
-                            <Text style={{color: "#565556D"}}>{item.date}</Text>
+                            <Text style={styles.date}>{item.date?.toDate().toLocaleDateString()}</Text>
                         </View>
                     </View>
                 </TouchableOpacity>
@@ -123,12 +124,13 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "fit-content",
         borderRadius: 10,
-        padding: 10,
+        padding: 15,
         marginBottom: 20
     },
     shopName: {
         fontSize: 18,
         fontFamily: fonts.semiBold,
+        color:Colors.default.text
     },
     title: {
         display: "flex",
@@ -140,5 +142,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 5,
+    },
+    date:{
+        fontFamily: fonts.medium,
+        color: "#565556D",
+        fontSize: 12
+
+    },
+    image:{
+        width: '100%',
+        height: 200,
+        resizeMode:'stretch',
+        borderRadius:10,
+        marginBottom:10,
     }
 });

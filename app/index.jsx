@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 /* Component for rendering each user type item */
@@ -52,7 +53,8 @@ export default function Index() {
     }
 
     if(selectedId === "restuarant") {
-        router.navigate("/(auth)/(restuarant)/signUp")
+        // router.navigate("/(auth)/(restuarant)/signUp")
+        router.navigate("/restuarant")
     }
 
     if(selectedId === "volunteer") {
@@ -60,16 +62,18 @@ export default function Index() {
     }
 
     if(selectedId === "home") {
-        router.navigate("/(auth)/(home)/signUp")
+        // router.navigate("/(auth)/(home)/signUp")
+        router.navigate("/home")
     }
 
     if (selectedId === "ngo") {
-        router.navigate("/(auth)/(NGO)/signUp")
+      // router.navigate("/(auth)/(NGO)/signUp")
+        router.navigate("/NGO/(deliveryProgress)/progress1")
     }
   };
 
   return (
-    <View style={globalStyles.container}>
+    <SafeAreaView style={globalStyles.container}>
         <Text style={globalStyles.headingText}>Who Are You ?</Text>
         <FlatList
           data={userRoles}
@@ -87,7 +91,7 @@ export default function Index() {
       <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
         <Text style={globalStyles.buttonText}>Next</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

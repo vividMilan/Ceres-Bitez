@@ -1,9 +1,7 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { auth } from "@/firebaseConfig";
 import { Link, useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -18,15 +16,15 @@ export default function login() {
 
     const handleLogin = async () => {
 
-        if (!email || !password) {
-            alert("Please fill in all fields.");
-            return;
-        }
+        // if (!email || !password) {
+        //     alert("Please fill in all fields.");
+        //     return;
+        // }
 
         try {
-            setLoading(true);
-            await signInWithEmailAndPassword(auth, email, password);
-            setLoading(false);
+            // setLoading(true);
+            // await signInWithEmailAndPassword(auth, email, password);
+            // setLoading(false);
             router.push("/student");
         } catch (error) {  
             alert("Login failed. Please check your credentials and try again.");

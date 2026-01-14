@@ -6,6 +6,7 @@ export default function HomeStackLayout() {
             <Stack.Screen 
                 name="index"
             />
+            <Stack.Screen name = "request"/>
         </Stack>
     )
 }

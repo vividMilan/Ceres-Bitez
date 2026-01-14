@@ -2,6 +2,7 @@ import PageTitleWithBackButton from "@/components/PageTitleWithBackButton";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
+import { router } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function request() {
@@ -17,7 +18,7 @@ export default function request() {
             <View style={[globalStyles.flexDisplay, {marginBottom: 20}]}>
                 <Image 
                     source={student_pic}
-                    style={{width: 60, height: 60, borderRadius: "50%"}}
+                    style={{width: 60, height: 60, borderRadius: 50}}
                 />
                 <Text style={[{fontSize: 20, fontFamily: fonts.semiBold}]}>
                     D. Dilshan
@@ -50,7 +51,8 @@ export default function request() {
                 </View>
             </View>
             
-            <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]}>
+            <TouchableOpacity style={[globalStyles.button, {marginTop: "auto"}]}
+                onPress={() => router.navigate("/restuarant/order")}>
                 <Text style={globalStyles.buttonText}>Accept</Text>
             </TouchableOpacity>
         </View>

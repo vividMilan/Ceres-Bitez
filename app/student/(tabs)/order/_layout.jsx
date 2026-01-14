@@ -6,6 +6,10 @@ export default function OrderStackLayout() {
             <Stack.Screen 
                 name="index"
             />
+             <Stack.Screen name = "(deliveryProgress)/progress1"/>
+            <Stack.Screen name = "(deliveryProgress)/progress2"/>
+            <Stack.Screen name = "(deliveryProgress)/progress3"/>
+            <Stack.Screen name = "(deliveryProgress)/progress4"/>
         </Stack>
     )
 }

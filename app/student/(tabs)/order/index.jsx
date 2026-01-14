@@ -1,6 +1,7 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
+import { useRouter } from "expo-router";
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const requests = [
@@ -35,11 +36,12 @@ const requests = [
 ]
 
 export default function Index() {
+    const router = useRouter();
 
     const renderRequests = ({ item }) => {
         
         return (
-            <TouchableOpacity style={styles.requestCard}>
+            <TouchableOpacity style={styles.requestCard} onPress={()=>{router.push('/student/(tabs)/order/progress2')}}>
                 <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>
                     {item.shopName}
                 </Text>

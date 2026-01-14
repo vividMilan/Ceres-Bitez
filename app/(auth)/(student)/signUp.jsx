@@ -13,6 +13,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function signUp() {
 
@@ -126,6 +127,7 @@ export default function signUp() {
 
             alert("Account created successfully")
             router.push("/(auth)/(student)/login")
+            
         } catch (error) {
             console.log(error)
         } finally {
@@ -134,7 +136,7 @@ export default function signUp() {
     }
 
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Create account</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <TextInput 
@@ -231,6 +233,6 @@ export default function signUp() {
                     </Text>
                 </View>
             </ScrollView>
-        </View>
+        </SafeAreaView>
     )
 }

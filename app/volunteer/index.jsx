@@ -1,4 +1,4 @@
-    import { globalStyles } from '@/constants/globalStyle';
+import { globalStyles } from '@/constants/globalStyle';
 import { Colors } from '@/constants/theme';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';

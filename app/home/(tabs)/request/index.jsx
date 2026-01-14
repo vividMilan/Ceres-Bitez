@@ -4,6 +4,7 @@ import { db } from "@/firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from "@react-native-picker/picker";
+import { useRouter } from "expo-router";
 import { collection, doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -15,6 +16,7 @@ export default function index() {
     const [loading, setLoading] = useState(false)
     const [qty, setQty] = useState()
     const [vegOrNonVeg, setVegOrNonVeg] = useState(null)
+    const router = useRouter()
 
     const today = new Date()
 
@@ -42,19 +44,24 @@ export default function index() {
     
     const handleAddRequest = async () => {
         
-        setLoading(true)
-        const request = {
-            qty: qty,
-            vegOrNonVeg: vegOrNonVeg,
-            date: date
-        }
-        try {
-            requestFood(request)
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
+        // setLoading(true)
+        // const request = {
+        //     qty: qty,
+        //     vegOrNonVeg: vegOrNonVeg,
+        //     date: date
+        // }
+        // try {
+        //     requestFood(request)
+        // } catch (error) {
+        //     console.log(error)
+        // } finally {
+        //     setLoading(false)
+        // }
+
+        router.navigate("/home/(tabs)/request/(deliveryProgress)/progress5")
+
+
+
 
     }
 
@@ -76,7 +83,7 @@ export default function index() {
                 </Picker>
             </View>
             <TouchableOpacity onPress={() => setShow(true)} style={[globalStyles.input, globalStyles.flexDisplay]} >
-                <Text style={[globalStyles.regularText, {color: Colors.default.inputText}]}>{date ? "Select Date": date.getDate()}</Text>
+                <Text style={[globalStyles.regularText, {color: Colors.default.inputText}]}>date</Text>
                 <Entypo name="calendar" size={16} />
             </TouchableOpacity>
 
