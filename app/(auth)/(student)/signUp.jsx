@@ -4,23 +4,29 @@ import { Colors } from "@/constants/theme";
 import { universities } from "@/data/universities";
 import { auth, db } from "@/firebaseConfig";
 import { supabase } from "@/supabaseConfig";
-import Entypo from '@expo/vector-icons/Entypo';
+import Entypo from "@expo/vector-icons/Entypo";
 import { Picker } from "@react-native-picker/picker";
-import { Checkbox } from 'expo-checkbox';
+import { Checkbox } from "expo-checkbox";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function signUp() {
+    const router = useRouter();
 
-    const router = useRouter()
+    const [isChecked, setChecked] = useState(false);
 
-    const [isChecked, setChecked] = useState(false)
-
-    
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [mobile, setMobile] = useState("");
@@ -30,7 +36,7 @@ export default function signUp() {
     const [university, setUniversity] = useState("");
     const [imageUri, setImageUri] = useState(null);
     const [loading, setLoading] = useState(false);
-    
+
     const openCamera = async () => {
         const permission = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -42,11 +48,11 @@ export default function signUp() {
         const result = await ImagePicker.launchCameraAsync({
             cameraType: ImagePicker.CameraType.back,
             allowsEditing: true,
-            quality: 0.75
+            quality: 0.75,
         });
 
         if (!result.canceled) {
-            setImageUri(result.assets[0].uri)
+            setImageUri(result.assets[0].uri);
         }
     };
 
@@ -56,7 +62,7 @@ export default function signUp() {
     };
 
     const uploadRecordBook = async (uri, uid) => {
-        const response = await fetch(uri)
+        const response = await fetch(uri);
         const arrayBuffer = await response.arrayBuffer();
         const filePath = `${uid}/recordBook.jpg`;
 
@@ -81,35 +87,34 @@ export default function signUp() {
 
     const handleSignUp = async () => {
         if (!isChecked) {
-            alert("Accept term & conditions")
+            alert("Accept term & conditions");
             return;
         }
 
         if (!imageUri) {
-            alert("Upload student recotd book")
-            return
+            alert("Upload student recotd book");
+            return;
         }
 
         if (password !== confirmPassword) {
-            alert("Passwords do not match")
-            return
+            alert("Passwords do not match");
+            return;
         }
 
         try {
-            setLoading(true)
-
+            setLoading(true);
 
             //firebase Auth
             const userCred = await createUserWithEmailAndPassword(
                 auth,
                 email,
-                password
-            )
+                password,
+            );
 
             const uid = userCred.user.uid;
 
             // Upload Image to supabase
-            const recordBookUrl = await uploadRecordBook(imageUri, uid)
+            const recordBookUrl = await uploadRecordBook(imageUri, uid);
 
             // Save student profile in Firebase
 
@@ -121,37 +126,37 @@ export default function signUp() {
                 university,
                 recordBookUrl,
                 role: "student",
-                createdAt: new Date()
-            })
+                createdAt: new Date(),
+            });
 
-            alert("Account created successfully")
-            router.push("/(auth)/(student)/login")
+            alert("Account created successfully");
+            router.push("/(auth)/(student)/login");
         } catch (error) {
-            console.log(error)
+            console.log(error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Create account</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
-                <TextInput 
+                <TextInput
                     placeholder="Name with initials"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
                     value={name}
                     onChangeText={setName}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Student email"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
                     value={email}
                     onChangeText={setEmail}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Mobile Number"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
@@ -159,14 +164,14 @@ export default function signUp() {
                     onChangeText={setMobile}
                     keyboardType="numeric"
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Student Registration Number"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
                     value={regNo}
                     onChangeText={setRegNo}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Password"
                     style={globalStyles.input}
                     secureTextEntry={true}
@@ -174,7 +179,7 @@ export default function signUp() {
                     value={password}
                     onChangeText={setPassword}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Confirm Password"
                     style={globalStyles.input}
                     secureTextEntry={true}
@@ -182,9 +187,23 @@ export default function signUp() {
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
                 />
-                <Pressable style={globalStyles.cameraClick} onPress={openCamera}>
-                    <Entypo name="camera" size={72} color={Colors.default.inputText}/>
-                    <Text style={{fontSize: fontSizes.regular, color: Colors.default.inputText}}>Student Record Book</Text>
+                <Pressable
+                    style={globalStyles.cameraClick}
+                    onPress={openCamera}
+                >
+                    <Entypo
+                        name="camera"
+                        size={72}
+                        color={Colors.default.inputText}
+                    />
+                    <Text
+                        style={{
+                            fontSize: fontSizes.regular,
+                            color: Colors.default.inputText,
+                        }}
+                    >
+                        Student Record Book
+                    </Text>
                 </Pressable>
 
                 <View style={globalStyles.dropDownContainer}>
@@ -192,26 +211,38 @@ export default function signUp() {
                         selectedValue={university}
                         onValueChange={(value) => setUniversity(value)}
                     >
-                        <Picker.Item style={{color: Colors.default.inputText}} label="Select University" value="" />
+                        <Picker.Item
+                            style={{ color: Colors.default.inputText }}
+                            label="Select University"
+                            value=""
+                        />
 
-                            {universities.map((item, index) => (
-                                <Picker.Item
-                                    key={index}
-                                    label={item}
-                                    value={item}
-                                />
-                            ))}
+                        {universities.map((item, index) => (
+                            <Picker.Item
+                                key={index}
+                                label={item}
+                                value={item}
+                            />
+                        ))}
                     </Picker>
                 </View>
-                
-                <View style={{flexDirection: "row", alignItems: "center", marginBottom: 20}}>
-                    <Checkbox 
-                        style={{width: 30, height: 30, margin: 8}}
+
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 20,
+                    }}
+                >
+                    <Checkbox
+                        style={{ width: 30, height: 30, margin: 8 }}
                         value={isChecked}
                         onValueChange={setChecked}
                         color={Colors.default.primary}
                     />
-                    <Text style={globalStyles.regularText}>By selecting checkbox accept the terms and conditions</Text>
+                    <Text style={globalStyles.regularText}>
+                        By selecting checkbox accept the terms and conditions
+                    </Text>
                 </View>
 
                 <TouchableOpacity
@@ -222,15 +253,30 @@ export default function signUp() {
                     <Text style={[globalStyles.buttonText]}>Sign Up</Text>
                 </TouchableOpacity>
 
-
                 {/* Login Button */}
-                <View> 
-                    <Text onPress={() => router.push("/(auth)/(student)/login")} style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
+                <View>
+                    <Text
+                        onPress={() => router.push("/(auth)/(student)/login")}
+                        style={{
+                            marginHorizontal: "auto",
+                            fontFamily: fonts.regular,
+                        }}
+                    >
                         Already have an account ?
-                        <Text style={[{color: Colors.default.primary, fontFamily: fonts.semiBold}]}> Login</Text>
+                        <Text
+                            style={[
+                                {
+                                    color: Colors.default.primary,
+                                    fontFamily: fonts.semiBold,
+                                },
+                            ]}
+                        >
+                            {" "}
+                            Login
+                        </Text>
                     </Text>
                 </View>
             </ScrollView>
-        </View>
-    )
+        </SafeAreaView>
+    );
 }

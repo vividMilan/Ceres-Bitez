@@ -3,16 +3,16 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TextInput, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function login() {
+    const [username, setUsername] = useState("");
+    const [pwd, setPwd] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const [username, setUsername] = useState("")
-    const [pwd, setPwd] = useState("")
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState("")
-
-    const router = useRouter()
+    const router = useRouter();
 
     const handleLogin = async () => {
         // Handle login logic here
@@ -25,26 +25,26 @@ export default function login() {
         try {
             setLoading(true);
             // await signInWithEmailAndPassword(auth, username, pwd)
-            router.push("/restuarant/")
+            router.push("/restuarant/");
         } catch (err) {
-            Alert.alert(err)
+            Alert.alert(err);
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return (
-        <View style={[globalStyles.container, {marginTop: 100}]}>
+        <SafeAreaView style={[globalStyles.container, { marginTop: 100 }]}>
             <Text style={globalStyles.titleText}>Login</Text>
 
-            <TextInput 
+            <TextInput
                 style={globalStyles.input}
                 placeholder="Username"
                 value={username}
                 onChangeText={setUsername}
             />
 
-            <TextInput 
+            <TextInput
                 style={globalStyles.input}
                 placeholder="Password"
                 value={pwd}
@@ -58,12 +58,27 @@ export default function login() {
                 </Text>
             </TouchableOpacity>
 
-            <Text style={[globalStyles.regularText, {fontFamily: fonts.semiBold, textAlign: "center"}]}>
-                Don't Have an account. {
-                <Text style={[globalStyles.regularText, {fontFamily: fonts.semiBold, color: Colors.default.primary}]}>
-                    Sign Up
-                </Text>}
+            <Text
+                style={[
+                    globalStyles.regularText,
+                    { fontFamily: fonts.semiBold, textAlign: "center" },
+                ]}
+            >
+                Don't Have an account.{" "}
+                {
+                    <Text
+                        style={[
+                            globalStyles.regularText,
+                            {
+                                fontFamily: fonts.semiBold,
+                                color: Colors.default.primary,
+                            },
+                        ]}
+                    >
+                        Sign Up
+                    </Text>
+                }
             </Text>
-        </View>
-    )
+        </SafeAreaView>
+    );
 }

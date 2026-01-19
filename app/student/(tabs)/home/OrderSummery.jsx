@@ -1,109 +1,140 @@
-import PageTitleWithBackButton from '@/components/PageTitleWithBackButton';
-import { fonts } from '@/constants/fonts';
-import { globalStyles } from '@/constants/globalStyle';
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import PageTitleWithBackButton from "@/components/PageTitleWithBackButton";
+import { fonts } from "@/constants/fonts";
+import { globalStyles } from "@/constants/globalStyle";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as Location from "expo-location";
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OrderSummery() {
-    
-    const {shopId, shopName, selectedItems} = useLocalSearchParams()
-    
-    const parsedSelectedItems = JSON.parse(selectedItems) || []
-    
-    const [location, setLocation] = useState(null)
-    const [loading, setLoading] = useState(false)
-    const [address, setAddress] = useState("")
-    const [city, setCity] = useState("")
-    const [canPress, setCanPress] = useState(false)
-    
-   
+    const { shopId, shopName, selectedItems } = useLocalSearchParams();
+
+    const parsedSelectedItems = JSON.parse(selectedItems) || [];
+
+    const [location, setLocation] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [address, setAddress] = useState("");
+    const [city, setCity] = useState("");
+    const [canPress, setCanPress] = useState(false);
+
     const urlBuilder = (latitude, longitude) => {
-        return (`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`)
-    }
+        return `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`;
+    };
 
     const fetchAddress = async (latitude, longitude) => {
         try {
-            const url = urlBuilder(latitude, longitude)
-            const response = await fetch(url)
-            const data = await response.json()
+            const url = urlBuilder(latitude, longitude);
+            const response = await fetch(url);
+            const data = await response.json();
 
-            const name = data.results[0].name ?? data.results[0].street
-            const suburb = data.results[0].suburb
+            const name = data.results[0].name ?? data.results[0].street;
+            const suburb = data.results[0].suburb;
 
-            setAddress(name)
-            setCity(suburb)
+            setAddress(name);
+            setCity(suburb);
 
-            console.log(name)
-            console.log(`City: ${suburb}`)
-            
+            console.log(name);
+            console.log(`City: ${suburb}`);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
+    };
 
     const getCurrentLocation = async () => {
         try {
-            setLoading(true)
-            const { status } = await Location.requestForegroundPermissionsAsync()
+            setLoading(true);
+            const { status } =
+                await Location.requestForegroundPermissionsAsync();
 
             if (status !== "granted") {
-                return
+                return;
             }
 
             const fetchedLocation = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.High
-            })
+                accuracy: Location.Accuracy.High,
+            });
 
-            const {latitude, longitude} = fetchedLocation.coords
+            const { latitude, longitude } = fetchedLocation.coords;
 
-            fetchAddress(latitude, longitude)
-            setLocation({latitude, longitude})
-            setCanPress(true)
-
+            fetchAddress(latitude, longitude);
+            setLocation({ latitude, longitude });
+            setCanPress(true);
         } catch (error) {
-            console.log(error)
+            console.log(error);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
-        getCurrentLocation()
-    }, [])
+        getCurrentLocation();
+    }, []);
 
-    const router = useRouter()
+    const router = useRouter();
     return (
-        <View style={globalStyles.container}>
-            <ScrollView stickyHeaderIndices={[0]} >
-                <PageTitleWithBackButton 
-                    heading={"Summery"}
-                />
+        <SafeAreaView style={globalStyles.container}>
+            <ScrollView stickyHeaderIndices={[0]}>
+                <PageTitleWithBackButton heading={"Summery"} />
                 <View>
-                    <View style={{marginBottom: 20}}>
+                    <View style={{ marginBottom: 20 }}>
                         <Text style={[globalStyles.subTitleText]}>Address</Text>
-                        <TouchableOpacity style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
-                            <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
-                                <FontAwesome6 name="location-dot" size={36} color="black" />
+                        <TouchableOpacity
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    gap: 10,
+                                }}
+                            >
+                                <FontAwesome6
+                                    name="location-dot"
+                                    size={36}
+                                    color="black"
+                                />
                                 <View>
-                                    {
-                                        address && city ? (
-                                            <>
-                                                <Text style={{fontFamily: fonts.regular}}>{address}</Text>
-                                                <Text style={{fontFamily: fonts.regular}}>{city}</Text>
-                                            </>
-                                        ): (
-                                            <Text>Loading....</Text>
-                                        )
-                                    }
+                                    {address && city ? (
+                                        <>
+                                            <Text
+                                                style={{
+                                                    fontFamily: fonts.regular,
+                                                }}
+                                            >
+                                                {address}
+                                            </Text>
+                                            <Text
+                                                style={{
+                                                    fontFamily: fonts.regular,
+                                                }}
+                                            >
+                                                {city}
+                                            </Text>
+                                        </>
+                                    ) : (
+                                        <Text>Loading....</Text>
+                                    )}
                                 </View>
                             </View>
 
-                            <MaterialIcons name="navigate-next" size={44} color="black" />
+                            <MaterialIcons
+                                name="navigate-next"
+                                size={44}
+                                color="black"
+                            />
                         </TouchableOpacity>
                     </View>
                     <View>
@@ -115,37 +146,57 @@ export default function OrderSummery() {
                             />
                         ))} */}
                     </View>
-                    <View style={{marginBottom: 20}}>
+                    <View style={{ marginBottom: 20 }}>
                         <Text style={[globalStyles.subTitleText]}>Price</Text>
                         {parsedSelectedItems.map((item, index) => (
-                            <View key={index} style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-                                <Text style={{fontSize: 20, fontFamily: fonts.regular}}>{item.name}</Text>
-                                <Text style={{fontSize: 20, fontFamily: fonts.regular}}>Rs.{item.price * item.qty}</Text>
+                            <View
+                                key={index}
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        fontSize: 20,
+                                        fontFamily: fonts.regular,
+                                    }}
+                                >
+                                    {item.name}
+                                </Text>
+                                <Text
+                                    style={{
+                                        fontSize: 20,
+                                        fontFamily: fonts.regular,
+                                    }}
+                                >
+                                    Rs.{item.price * item.qty}
+                                </Text>
                             </View>
                         ))}
                     </View>
-
                 </View>
             </ScrollView>
-            <TouchableOpacity 
+            <TouchableOpacity
                 disabled={!canPress}
-                style={[globalStyles.button, {marginTop: "auto"}]} 
-                onPress={() => 
+                style={[globalStyles.button, { marginTop: "auto" }]}
+                onPress={() =>
                     router.push({
-                       pathname: "/student/(tabs)/home/checkout",
-                       params: {
-                        shopId,
-                        shopName,
-                        location: JSON.stringify(location),
-                        request: JSON.stringify(parsedSelectedItems),
-                       } 
+                        pathname: "/student/(tabs)/home/checkout",
+                        params: {
+                            shopId,
+                            shopName,
+                            location: JSON.stringify(location),
+                            request: JSON.stringify(parsedSelectedItems),
+                        },
                     })
                 }
             >
                 <Text style={globalStyles.buttonText}>Next</Text>
             </TouchableOpacity>
-        </View>
-    )
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -157,6 +208,6 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: "#fff",
         borderTopWidth: 1,
-        borderTopColor: "#eee"
-    }
-})
+        borderTopColor: "#eee",
+    },
+});
