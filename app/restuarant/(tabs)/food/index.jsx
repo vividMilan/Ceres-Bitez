@@ -8,7 +8,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Image, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const preference = [
     "Non-Veg",
@@ -123,7 +123,7 @@ export default function Index() {
     const handleAddFood = async () => {
         setLoading(true)
         try {
-            const restuarantId = "BHSosuIE1FlyBTFDerYq"
+            const restuarantId = "7ADL1PRfW0V6deM9bR2UjxdSXS72"
 
             const imageUrl = await uploadImage(imageUri)
             const notSuitableAt = Timestamp.fromMillis(Date.now() + 3 * 60 * 60 * 1000)

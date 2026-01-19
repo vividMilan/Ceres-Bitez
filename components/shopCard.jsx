@@ -1,12 +1,40 @@
 import { fonts } from "@/constants/fonts";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { db } from "@/firebaseConfig";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-export default function ShopCard({id, image, shopName, rating, deliveryTime, priceRange}) {
+export default function ShopCard({shopId, image, shopName}) {
 
     const router = useRouter()
+
+    const [menu, setMenu] = useState([])
+    
+    useEffect(() => {
+        const fetchFoods = async () => {
+            const now = new Date()
+
+            const foodsSnap = await getDocs(
+                query(
+                    collection(db, "foods"),
+                    where("restuarantId" , "==", shopId),
+                    where("notSuitableAt", "<", now)
+                )
+            )
+
+            const foodList = foodsSnap.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data()
+            }))
+
+            setMenu(foodList)
+            console.log(foodList)
+        }
+
+        fetchFoods()
+    }, [])
 
     return (
         <TouchableOpacity 
@@ -15,9 +43,10 @@ export default function ShopCard({id, image, shopName, rating, deliveryTime, pri
                     router.push({
                         pathname: "/student/home/shopPage",
                         params: {
-                            shopId: id,
+                            shopId,
                             shopName,
-                            image
+                            image,
+                            menu: JSON.stringify(menu)
                         }
                     })
             }
@@ -33,16 +62,6 @@ export default function ShopCard({id, image, shopName, rating, deliveryTime, pri
                 </View>
                     
             </View>
-            <View style={styles.ratingRow}>
-                <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
-                    <AntDesign name="star" size={16} color="black" />
-                    <Text style={{color: "black", fontFamily: fonts.semiBold}}>{rating}</Text>
-                </View>
-                <View>
-                    <Text style={{color: "#565556D"}}>{deliveryTime}</Text>
-                </View>
-                </View>
-            <Text>Rs. {priceRange}</Text>
         </TouchableOpacity>
     )
 }

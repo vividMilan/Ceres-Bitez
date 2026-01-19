@@ -41,6 +41,11 @@ export default function Index() {
     router.navigate("/volunteer/")
   }, [])
 
+
+    useEffect(() => {
+      router.push("/student/(tabs)/home")
+    }, [])
+
   // State to keep track of the selected item
   const [selectedId, setSelectedId] = useState(null);
 
