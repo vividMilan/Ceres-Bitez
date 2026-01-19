@@ -76,7 +76,7 @@ export default function Index() {
                     onPress: openCamera
                 },
                 {
-                    text: "Gallery",setQuantity,
+                    text: "Gallery",
                     onPress: openGallery
                 },
                 {
@@ -183,7 +183,7 @@ export default function Index() {
                 keyboardType="numeric"
             />
 
-            <Pressable style={styles.cameraClick} onPress={selectImage}>
+            <Pressable onPress={selectImage}>
 
                 {imageUri ? 
                 
@@ -199,7 +199,7 @@ export default function Index() {
             </Pressable>
 
 
-            <View style={styles.dropDownContainer}>
+            <View>
                 <Picker
                     selectedValue={vegNonVeg}
                     onValueChange={(value) => setVegNonVeg(value)}
@@ -223,23 +223,3 @@ export default function Index() {
     )
 }
 
-const styles = StyleSheet.create({
-    cameraClick: {
-        height: 300,
-        width: "100%",
-        backgroundColor: Colors.default.greyBackground,
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 10,
-        borderRadius: 50,
-        marginBottom: 20
-    },
-    dropDownContainer: {
-        width: "100%",
-        backgroundColor: Colors.default.greyBackground,
-        borderRadius: 50,
-        marginBottom: 20,
-        paddingInline: 10
-    }
-})

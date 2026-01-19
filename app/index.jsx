@@ -35,7 +35,11 @@ const Item = ({ id, title, icon, isSelected, onSelect }) => {
 
 export default function Index() {
 
-    const router = useRouter()
+  const router = useRouter()
+
+  useEffect(() => {
+    router.navigate("/volunteer/")
+  }, [])
 
 
     useEffect(() => {
@@ -57,7 +61,8 @@ export default function Index() {
     }
 
     if(selectedId === "restuarant") {
-        router.navigate("/(auth)/(restuarant)/signUp")
+      // router.navigate("/(auth)/(restuarant)/signUp")
+      router.navigate("/restuarant/(tabs)/food/")
     }
 
     if(selectedId === "volunteer") {
