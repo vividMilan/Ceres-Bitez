@@ -50,6 +50,10 @@ export default function CheckOut() {
             const restaurantSnap = await getDoc(restaurantRef);
             const restaurantData = restaurantSnap.data();
 
+            const totalPrice = parsedRequest.reduce((sum, item) => {
+                return sum + item.price * item.qty;
+            }, 0);
+
             const requestData = {
                 student: {
                     studentId,
@@ -70,6 +74,7 @@ export default function CheckOut() {
                 foodItems: parsedRequest,
                 paymentMethod: paymentMethod,
                 status: "pending",
+                totalPrice: totalPrice,
                 createdAt: serverTimestamp(),
             };
 

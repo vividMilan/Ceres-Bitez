@@ -117,14 +117,13 @@ export default function index() {
 
                 const distKm = await getDistanceKm(currentLocation, shopCoords);
 
-                if (distKm < 5) {
+                if (distKm < 100) {
                     nearby.push({
                         ...req,
                         distance: distKm.toFixed(2),
                     });
                 }
             }
-
             nearby.sort((a, b) => a.distance - b.distance);
 
             setNearbyRequests(nearby);

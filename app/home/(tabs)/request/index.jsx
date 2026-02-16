@@ -10,7 +10,7 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function index() {
-    const [date, setDate] = useState();
+    const [date, setDate] = useState(null);
     const [show, setShow] = useState(false);
     const [loading, setLoading] = useState(false);
     const [qty, setQty] = useState();
@@ -34,8 +34,12 @@ export default function index() {
             date: item.date,
         });
 
-        console.log("Add Successfully");
+        // console.log("Add Successfully");
         Alert.alert("Request Submitted Successfully");
+
+        setQty("");
+        setVegOrNonVeg(null);
+        setDate(null);
     };
 
     const handleAddRequest = async () => {
@@ -84,14 +88,14 @@ export default function index() {
                         { color: Colors.default.inputText },
                     ]}
                 >
-                    {date ? "Select Date" : date.getDate()}
+                    {date ? date.toDateString() : "Select Date"}
                 </Text>
                 <Entypo name="calendar" size={16} />
             </TouchableOpacity>
 
             {show && (
                 <DateTimePicker
-                    value={date}
+                    value={date || today}
                     mode="date"
                     onChange={onChange}
                     minimumDate={today}

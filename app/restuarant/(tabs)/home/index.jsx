@@ -33,6 +33,7 @@ export default function Index() {
                 query(
                     collection(db, "studentRequests"),
                     where("restuarant.restuarantId", "==", restuarantId),
+                    where("status", "==", "pending"),
                 ),
             );
 

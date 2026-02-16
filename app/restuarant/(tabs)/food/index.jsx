@@ -17,6 +17,7 @@ import {
     Alert,
     Image,
     Pressable,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
@@ -162,78 +163,86 @@ export default function Index() {
     return (
         <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Add Food</Text>
+            <ScrollView>
+                <TextInput
+                    style={globalStyles.input}
+                    placeholder="Name"
+                    value={name}
+                    onChangeText={setName}
+                />
 
-            <TextInput
-                style={globalStyles.input}
-                placeholder="Name"
-                value={name}
-                onChangeText={setName}
-            />
+                <TextInput
+                    style={globalStyles.input}
+                    placeholder="Quantity"
+                    value={quantity}
+                    onChangeText={setQuantity}
+                    keyboardType="numeric"
+                />
 
-            <TextInput
-                style={globalStyles.input}
-                placeholder="Quantity"
-                value={quantity}
-                onChangeText={setQuantity}
-                keyboardType="numeric"
-            />
+                <TextInput
+                    style={globalStyles.input}
+                    placeholder="Set Price"
+                    value={price}
+                    onChangeText={setPrice}
+                    keyboardType="numeric"
+                />
 
-            <TextInput
-                style={globalStyles.input}
-                placeholder="Set Price"
-                value={price}
-                onChangeText={setPrice}
-                keyboardType="numeric"
-            />
-
-            <Pressable onPress={selectImage}>
-                {imageUri ? (
-                    <Image
-                        source={{ uri: imageUri }}
-                        resizeMode="cover"
-                        style={{ width: 100, height: 100 }}
-                    />
-                ) : (
-                    <Entypo
-                        name="camera"
-                        size={72}
-                        color={Colors.default.inputText}
-                    />
-                )}
-                <Text
-                    style={{
-                        fontSize: fontSizes.regular,
-                        color: Colors.default.inputText,
-                    }}
+                <Pressable
+                    onPress={selectImage}
+                    style={globalStyles.cameraClick}
                 >
-                    Upload Food Picture
-                </Text>
-            </Pressable>
+                    {imageUri ? (
+                        <Image
+                            source={{ uri: imageUri }}
+                            resizeMode="cover"
+                            style={{ width: 100, height: 100 }}
+                        />
+                    ) : (
+                        <Entypo
+                            name="camera"
+                            size={72}
+                            color={Colors.default.inputText}
+                        />
+                    )}
+                    <Text
+                        style={{
+                            fontSize: fontSizes.regular,
+                            color: Colors.default.inputText,
+                        }}
+                    >
+                        Upload Food Picture
+                    </Text>
+                </Pressable>
 
-            <View>
-                <Picker
-                    selectedValue={vegNonVeg}
-                    onValueChange={(value) => setVegNonVeg(value)}
+                <View>
+                    <Picker
+                        selectedValue={vegNonVeg}
+                        onValueChange={(value) => setVegNonVeg(value)}
+                    >
+                        <Picker.Item
+                            style={{ color: Colors.default.inputText }}
+                            label="Veg / Non-Veg"
+                        />
+
+                        {preference.map((item, index) => (
+                            <Picker.Item
+                                key={index}
+                                label={item}
+                                value={item}
+                            />
+                        ))}
+                    </Picker>
+                </View>
+
+                <TouchableOpacity
+                    onPress={handleAddFood}
+                    style={[globalStyles.button, { marginTop: "auto" }]}
                 >
-                    <Picker.Item
-                        style={{ color: Colors.default.inputText }}
-                        label="Veg / Non-Veg"
-                    />
-
-                    {preference.map((item, index) => (
-                        <Picker.Item key={index} label={item} value={item} />
-                    ))}
-                </Picker>
-            </View>
-
-            <TouchableOpacity
-                onPress={handleAddFood}
-                style={[globalStyles.button, { marginTop: "auto" }]}
-            >
-                <Text style={globalStyles.buttonText}>
-                    {loading ? "Adding Food..." : "Add Food"}
-                </Text>
-            </TouchableOpacity>
+                    <Text style={globalStyles.buttonText}>
+                        {loading ? "Adding Food..." : "Add Food"}
+                    </Text>
+                </TouchableOpacity>
+            </ScrollView>
         </SafeAreaView>
     );
 }
