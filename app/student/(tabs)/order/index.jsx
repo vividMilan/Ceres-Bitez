@@ -1,7 +1,13 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const requests = [
     {
@@ -9,38 +15,36 @@ const requests = [
         items: [
             {
                 name: "Egg Hoopers",
-                qty: 5
+                qty: 5,
             },
             {
                 name: "Fish Rice and Curry",
-                qty: 2
-            }
+                qty: 2,
+            },
         ],
-        price : 350
+        price: 350,
     },
     {
         shopName: "Amatchi Foods",
         items: [
             {
                 name: "Egg Hoopers",
-                qty: 5
+                qty: 5,
             },
             {
                 name: "Fish Rice and Curry",
-                qty: 2
-            }
+                qty: 2,
+            },
         ],
-        price : 350
+        price: 350,
     },
-]
+];
 
 export default function Index() {
-
     const renderRequests = ({ item }) => {
-        
         return (
             <TouchableOpacity style={styles.requestCard}>
-                <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>
+                <Text style={{ fontSize: 20, fontFamily: fonts.semiBold }}>
                     {item.shopName}
                 </Text>
 
@@ -50,24 +54,25 @@ export default function Index() {
                     </Text>
                 ))}
 
-                <Text style={{fontSize: 24, fontFamily: fonts.semiBold, marginTop: 5}}>
+                <Text
+                    style={{
+                        fontSize: 24,
+                        fontFamily: fonts.semiBold,
+                        marginTop: 5,
+                    }}
+                >
                     Rs. {item.price}
                 </Text>
             </TouchableOpacity>
-        )
-        
-    }
+        );
+    };
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Ongoing Requests</Text>
-            
-            <FlatList
-                data={requests}
-                renderItem={renderRequests}
-            >
-            </FlatList>
-        </View>
-    )
+
+            <FlatList data={requests} renderItem={renderRequests}></FlatList>
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -77,6 +82,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.default.greyBackground,
         padding: 16,
         borderRadius: 10,
-        marginBottom: 10
-    }
-})
+        marginBottom: 10,
+    },
+});

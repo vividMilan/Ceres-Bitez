@@ -4,27 +4,27 @@ import { Colors } from "@/constants/theme";
 import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function login() {
-
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const router = useRouter()
+    const router = useRouter();
 
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Login</Text>
             <View>
-                <TextInput 
+                <TextInput
                     placeholder="NGO Email"
                     style={globalStyles.input}
                     placeholderTextColor={Colors.default.inputText}
                     value={email}
                     onChangeText={setEmail}
                 />
-                <TextInput 
+                <TextInput
                     placeholder="Password"
                     secureTextEntry={true}
                     style={globalStyles.input}
@@ -40,13 +40,28 @@ export default function login() {
                         {loading ? "Logging in..." : "Login"}
                     </Text>
                 </TouchableOpacity>
-                <Link href={"/signUp"}> 
-                    <Text style={{marginHorizontal: "auto", fontFamily: fonts.regular}}>
+                <Link href={"/signUp"}>
+                    <Text
+                        style={{
+                            marginHorizontal: "auto",
+                            fontFamily: fonts.regular,
+                        }}
+                    >
                         Dont Have an account
-                        <Text style={[{color: Colors.default.primary, fontFamily: fonts.semiBold}]}> Sign Up</Text>
+                        <Text
+                            style={[
+                                {
+                                    color: Colors.default.primary,
+                                    fontFamily: fonts.semiBold,
+                                },
+                            ]}
+                        >
+                            {" "}
+                            Sign Up
+                        </Text>
                     </Text>
                 </Link>
             </View>
-        </View>
-    )
+        </SafeAreaView>
+    );
 }

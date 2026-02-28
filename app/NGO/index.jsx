@@ -1,65 +1,72 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { db } from "@/firebaseConfig";
-import Entypo from '@expo/vector-icons/Entypo';
+import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function index() {
-
     const [searchText, setSearchText] = useState("");
-    const [loading, setLoading] = useState(true)
-    const [requests, setRequests] = useState([])
+    const [loading, setLoading] = useState(true);
+    const [requests, setRequests] = useState([]);
 
     const router = useRouter();
 
+    useEffect(() => {
+        const fetchRequests = async () => {
+            try {
+                setLoading(true);
+                const querySnapshot = await getDocs(collection(db, "requests"));
+                const homeListsSnapshot = await getDocs(collection(db, "home"));
 
-useEffect(() => {
-    const fetchRequests = async () => {
-        try {
-            setLoading(true)
-            const querySnapshot = await getDocs(collection(db, "requests"));
-            const homeListsSnapshot = await getDocs(collection(db, "home"));
+                const homeLists = [];
+                homeListsSnapshot.forEach((doc) => {
+                    homeLists.push({ id: doc.id, ...doc.data() });
+                });
 
-            const homeLists = [];
-            homeListsSnapshot.forEach((doc) => {
-                homeLists.push({ id: doc.id, ...doc.data() });
-            });
-
-            const requestsData = [];
-            querySnapshot.forEach((doc) => {
-                requestsData.push(
-                    { 
+                const requestsData = [];
+                querySnapshot.forEach((doc) => {
+                    requestsData.push({
                         id: doc.id,
-                        homeData: homeLists.find(home => home.id === doc.data().homeID), 
-                        ...doc.data()
-                    }
-                );
-            });
+                        homeData: homeLists.find(
+                            (home) => home.id === doc.data().homeID,
+                        ),
+                        ...doc.data(),
+                    });
+                });
 
-            setRequests(requestsData);
+                setRequests(requestsData);
 
-            console.log("Fetched Requests: ", requestsData);
+                console.log("Fetched Requests: ", requestsData);
+            } catch (error) {
+                console.log("Error fetching requests: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        } catch (error) {
-            console.log("Error fetching requests: ", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    fetchRequests();
-}, []);
+        fetchRequests();
+    }, []);
 
     const renderRequest = ({ item }) => {
         return (
-                <TouchableOpacity 
-                    style={styles.shopCard}
-                    key={item.id}
-                    onPress={() => router.push({
+            <TouchableOpacity
+                style={styles.shopCard}
+                key={item.id}
+                onPress={() =>
+                    router.push({
                         pathname: "/NGO/requestDetails",
                         params: {
                             requestId: item.id,
@@ -67,53 +74,72 @@ useEffect(() => {
                             homeName: item.homeData?.name,
                             homeImage: item.homeData?.image,
                             homeLocation: item.homeData?.location,
-                            requestDate: item.date
-                        }
-                    })}
-                >
+                            requestDate: item.date,
+                        },
+                    })
+                }
+            >
+                <Image
+                    source={{ uri: item.homeData?.image }}
+                    style={{ width: "100%", height: 200, borderRadius: 5 }}
+                />
 
-                    <Image source={{uri: item.homeData?.image}} style={{width:"100%", height: 200, borderRadius: 5}}/>
-
-                    <View style={styles.title}>
-                        <Text style={styles.shopName}>{item.homeData?.name}</Text>
+                <View style={styles.title}>
+                    <Text style={styles.shopName}>{item.homeData?.name}</Text>
+                </View>
+                <View style={styles.ratingRow}>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 2,
+                        }}
+                    >
+                        <Entypo name="location-pin" size={16} color="black" />
+                        <Text
+                            style={{
+                                color: "black",
+                                fontFamily: fonts.semiBold,
+                            }}
+                        >
+                            {item.homeData?.location}
+                        </Text>
                     </View>
-                    <View style={styles.ratingRow}>
-                        <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
-                            <Entypo name="location-pin" size={16} color="black" />
-                            <Text style={{color: "black", fontFamily: fonts.semiBold}}>{item.homeData?.location}</Text>
-                        </View>
-                        <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
-                            <Entypo name="calendar" size={16} color="black" />
-                            <Text style={{color: "#565556D"}}>{item.date}</Text>
-                        </View>
+                    <View
+                        style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 2,
+                        }}
+                    >
+                        <Entypo name="calendar" size={16} color="black" />
+                        <Text style={{ color: "#565556D" }}>{item.date}</Text>
                     </View>
-                </TouchableOpacity>
-        )
-    }
+                </View>
+            </TouchableOpacity>
+        );
+    };
 
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <View style={globalStyles.searchBoxRow}>
                 <FontAwesome name="search" size={24} color="black" />
-                <TextInput 
+                <TextInput
                     value={searchText}
                     onChangeText={setSearchText}
-                    style={{color: "grey", width: "100%"}}
+                    style={{ color: "grey", width: "100%" }}
                     placeholder="Seach Requests"
                 />
             </View>
-            <Text style={globalStyles.titleText}>
-                Food Requests Queue
-            </Text>
+            <Text style={globalStyles.titleText}>Food Requests Queue</Text>
 
-            <FlatList 
+            <FlatList
                 data={requests}
                 keyExtractor={(item) => item.id}
                 renderItem={renderRequest}
             />
-
-        </View>
-    )
+        </SafeAreaView>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -124,7 +150,7 @@ const styles = StyleSheet.create({
         height: "fit-content",
         borderRadius: 10,
         padding: 10,
-        marginBottom: 20
+        marginBottom: 20,
     },
     shopName: {
         fontSize: 18,
@@ -140,5 +166,5 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 5,
-    }
+    },
 });
