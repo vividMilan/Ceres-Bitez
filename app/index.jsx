@@ -3,7 +3,7 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { userRoles } from "@/data/userRoles";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -35,7 +35,7 @@ const Item = ({ id, title, icon, isSelected, onSelect }) => {
 
 export default function Index() {
 
-    const router = useRouter()
+  const router = useRouter()
 
   // State to keep track of the selected item
   const [selectedId, setSelectedId] = useState(null);
@@ -67,6 +67,10 @@ export default function Index() {
         router.navigate("/(auth)/(NGO)/signUp")
     }
   };
+
+  useEffect(() => {
+    router.navigate("/home/(tabs)/home")
+  },[])
 
   return (
     <View style={globalStyles.container}>
