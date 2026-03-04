@@ -3,7 +3,7 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { userRoles } from "@/data/userRoles";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   FlatList,
   Image,
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 /* Component for rendering each user type item */
@@ -68,12 +69,12 @@ export default function Index() {
     }
   };
 
-  useEffect(() => {
-    router.navigate("/home/(tabs)/home")
-  },[])
+  // useEffect(() => {
+  //   router.replace("/NGO")
+  // }, [])
 
   return (
-    <View style={globalStyles.container}>
+    <SafeAreaView style={globalStyles.container}>
         <Text style={globalStyles.headingText}>Who Are You ?</Text>
         <FlatList
           data={userRoles}
@@ -91,7 +92,7 @@ export default function Index() {
       <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
         <Text style={globalStyles.buttonText}>Next</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 

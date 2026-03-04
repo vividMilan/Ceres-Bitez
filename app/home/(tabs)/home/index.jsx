@@ -42,6 +42,7 @@ export default function index() {
 
     const renderRequest = ({ item }) => {
         // Safely convert Firestore timestamp to JS Date
+        
         const requestDate = item.date?.toDate ? item.date.toDate() : new Date(item.date);
 
         return (
@@ -97,8 +98,6 @@ export default function index() {
             );
         }
 
-        
-
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const fetchedRequests = snapshot.docs.map(doc => ({
                 id: doc.id,
@@ -120,13 +119,6 @@ export default function index() {
         } else if (request.status === "assigned") {
             console.log("This request is assigned");
         } else if (ongoingStatuses.includes(request.status)) {
-            // const screen = statusToScreen[request.status]
-            // if (screen) {
-            //     router.push(`/home/(deliveryProgress)`)
-            // } else {
-            //     console.warn(`No screen mapped for status: ${request.status}`)
-            // }
-
             router.push({
                 pathname: "/home/(deliveryProgress)",
                 params: {status: request.status, requestId: request.id}

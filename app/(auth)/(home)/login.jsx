@@ -1,14 +1,15 @@
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function login() {
 
     const router = useRouter()
 
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Login</Text>
 
             <TextInput 
@@ -31,6 +32,6 @@ export default function login() {
                         Login
                     </Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     )
 }

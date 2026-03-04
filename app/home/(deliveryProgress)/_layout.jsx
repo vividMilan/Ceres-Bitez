@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 const statusToScreen = {
     "n-accepted": "waitingForRestuarant",
+    "n-requested": "waitingForRestuarant",
     "r-accepted": "beingPacked",
     "packed": "waitingForVolunteer", 
     "rv-accepted": "map",
@@ -41,9 +42,12 @@ export default function ProgressLayout() {
         <Stack screenOptions={{headerShown: false}}>
             <Stack.Screen name="index" />
             <Stack.Screen name="waitingForRestuarant" />
+            <Stack.Screen name="waitingForVolunteer" />
+            <Stack.Screen name="waitingForVolunteer2" />
             <Stack.Screen name="beingPacked" />
-            <Stack.Screen name="onWayToRestuarant" />
-            <Stack.Screen name="checkingFood" />
+            <Stack.Screen name="delivered" />
+            <Stack.Screen name="map" />
+            <Stack.Screen name="beingChecked" />
         </Stack>
     );
 }

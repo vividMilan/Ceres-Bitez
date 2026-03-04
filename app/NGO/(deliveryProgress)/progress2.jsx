@@ -4,25 +4,27 @@ import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function onWayToRestuarant() {
+export default function progress2() {
   return (
     <SafeAreaView style={styles.container}>
-     <View style={styles.progressContainer}>
-            {[1, 2, 3,].map((i) => (
-              <View key={i} style={[styles.progressStep, styles.activeStep]} />
-            ))}
-            <View style={styles.progressStep} />
-            <View style={styles.progressStep} />
-             <View style={styles.progressStep} />
-            <View style={styles.progressStep} />
-          </View>
+      <View style={styles.progressContainer}>
+        <View style={[styles.progressStep, styles.activeStep]} />
+        <View style={[styles.progressStep, styles.activeStep]} />
+        <View style={styles.progressStep} />
+        <View style={styles.progressStep} />
+        <View style={styles.progressStep} />
+         <View style={styles.progressStep} />
+        <View style={styles.progressStep} />
+        <View style={styles.progressStep} />
+        <View style={styles.progressStep} />
+      </View>
 
       <View style={styles.contentContainer}>
-        <Text style={styles.headerText}>On the way to {"\n"}Restaurant......</Text>
+        <Text style={styles.headerText}>Food is being{"\n"}packed ...</Text>
 
         <View style={styles.imageWrapper}>
           <Image
-            source={require("../../../assets/images/NGO/onWayToRestuarant.png")}
+            source={require("../../../assets/images/deliveryProgress/progress2_pic.png")}
             style={styles.illustration}
             resizeMode="contain"
           />
@@ -54,11 +56,11 @@ const styles = StyleSheet.create({
   activeStep: { backgroundColor: Colors.default.primary },
   contentContainer: { flex: 1, marginTop: 20 },
   headerText: {
-    fontSize: 40,
     fontFamily: fonts.semiBold,
+    fontSize: 40,
     color: Colors.default.text,
     lineHeight: 50,
-    marginBottom: 50,
+    marginBottom: 60,
   },
   imageWrapper: {
     width: "100%",

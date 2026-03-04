@@ -5,6 +5,7 @@ import Checkbox from "expo-checkbox";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
   const [isChecked, setChecked] = useState(false);
@@ -20,7 +21,7 @@ export default function SignUp() {
   };
 
   return (
-    <View style={globalStyles.container}>
+    <SafeAreaView style={globalStyles.container}>
       <Text style={globalStyles.titleText}>Sign Up</Text>
 
       <TextInput
@@ -84,6 +85,6 @@ export default function SignUp() {
           </Text>
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
