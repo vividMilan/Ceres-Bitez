@@ -11,7 +11,7 @@ export const globalStyles = StyleSheet.create({
     titleText: {
         fontFamily: fonts.semiBold,
         fontSize: fontSizes.title,
-        marginBottom: 20
+        marginBottom: 4
     },
     subTitleText: {
         fontFamily: fonts.semiBold,
@@ -24,7 +24,7 @@ export const globalStyles = StyleSheet.create({
     container: {
         paddingHorizontal: 20,
         paddingVertical: 10,
-        marginTop: 25,
+        marginTop: 10,
         flex: 1,
         flexDirection: "column",
     },
@@ -100,5 +100,8 @@ export const globalStyles = StyleSheet.create({
         borderRadius: 50,
         marginBottom: 20,
         paddingInline: 10
+    },
+    marginBottom: {
+        marginBottom: 10
     }
 })

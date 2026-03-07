@@ -1,22 +1,77 @@
+import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from "@react-native-picker/picker";
-import { collection, doc, setDoc } from "firebase/firestore";
-import { useState } from "react";
+import * as Location from "expo-location";
+import { collection, doc, GeoPoint, serverTimestamp, setDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+
 
 export default function index() {
 
-    const [date, setDate] = useState()
+    const [date, setDate] = useState(new Date())
     const [show, setShow] = useState(false)
     const [loading, setLoading] = useState(false)
     const [qty, setQty] = useState()
     const [vegOrNonVeg, setVegOrNonVeg] = useState(null)
+    const [description, setDescription] = useState("")
+    const [currentLocation, setCurrentLocation] = useState(null)
+    const [address, setAddress] = useState("")
+    const [city, setCity] = useState("")
 
     const today = new Date()
+
+    const urlBuilder = (latitude, longitude) => {
+        return (`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`)
+    }
+
+    const fetchAddress = async (latitude, longitude) => {
+        try {
+            const url = urlBuilder(latitude, longitude)
+            const response = await fetch(url)
+            const data = await response.json()
+
+            const name = data.results[0].name ?? data.results[0].street
+            const suburb = data.results[0].suburb
+
+            setAddress(name)
+            setCity(suburb)
+
+            console.log(name)
+            console.log(`City: ${suburb}`)
+            
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const getCurrentLocation = async () => {
+        try {
+            const {status} = await Location.requestForegroundPermissionsAsync()
+
+            if (status !== "granted") {
+                Alert.alert("Location Permission is Required")
+                return
+            }
+
+            const location =    await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.Highest
+            })
+
+            const {latitude, longitude} = location.coords
+
+            setCurrentLocation({latitude, longitude})
+            fetchAddress(latitude, longitude)
+        } catch (err) {
+            console.log(err.message)
+        }
+    }
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -29,10 +84,20 @@ export default function index() {
         const newRequestRef = doc(collection(db, "requests"))
 
         await setDoc(newRequestRef, {
-            homeID: "uwgh6m1Q510uvx15Vxm8",
             qty: item.qty,
             veg: item.vegOrNonVeg === "veg" ? true : false,
-            date: item.date
+            date: item.date,
+            type: "home",
+            status: "pending",
+            createdAt: serverTimestamp(),
+            home : {
+                homeID: "uwgh6m1Q510uvx15Vxm8",
+                location: new GeoPoint(
+                    item.currentLocation.latitude,
+                    item.currentLocation.longitude
+                )
+            },
+            description: item.description || ""
         })
 
         console.log("Add Successfully")
@@ -41,22 +106,44 @@ export default function index() {
 
     
     const handleAddRequest = async () => {
-        
         setLoading(true)
-        const request = {
-            qty: qty,
-            vegOrNonVeg: vegOrNonVeg,
-            date: date
+
+        if (!qty || !vegOrNonVeg || !date) {
+            Alert.alert("Please fill all required fields")
+            setLoading(false)
+            return
         }
+
+        if (!currentLocation) {
+            Alert.alert("Location not ready. Please wait...")
+            setLoading(false)
+            return
+        }
+
+        const request = {
+            qty: Number(qty),
+            vegOrNonVeg,
+            date,
+            description,
+            currentLocation
+        }
+
         try {
-            requestFood(request)
+            await requestFood(request)
+            setDate(new Date())
+            setQty("")
+            setVegOrNonVeg(null)
+            setDescription("")
         } catch (error) {
             console.log(error)
         } finally {
             setLoading(false)
         }
-
     }
+
+    useEffect(() => {
+        getCurrentLocation()
+    }, [])
 
 
     return  (
@@ -76,22 +163,68 @@ export default function index() {
                 </Picker>
             </View>
             <TouchableOpacity onPress={() => setShow(true)} style={[globalStyles.input, globalStyles.flexDisplay]} >
-                <Text style={[globalStyles.regularText, {color: Colors.default.inputText}]}>{date ? "Select Date": date.getDate()}</Text>
+                <Text style={[globalStyles.regularText, {color: Colors.default.inputText}]}>
+                    {date ? date.toDateString() : "Select Date"}
+                </Text>
                 <Entypo name="calendar" size={16} />
             </TouchableOpacity>
 
             {show && (
                 <DateTimePicker
-                    value={date}
+                    value={date || new Date()}
                     mode="date" 
                     onChange={onChange}
                     minimumDate={today}
                 />
             )}
-            
+
+            <TextInput 
+                editable
+                multiline
+                numberOfLines={6}
+                maxLength={100}
+                onChangeText={setDescription}
+                value={description}
+                style={globalStyles.input}
+                placeholder="If there are any special instructions"
+                placeholderTextColor="grey"
+            />
+
+            <View>
+                <View style={{marginBottom: 20}}>
+                        <TouchableOpacity style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
+                            <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
+                                <FontAwesome6 name="location-dot" size={36} color="black" />
+                                <View>
+                                    {
+                                        address && city ? (
+                                            <>
+                                                <Text style={{fontFamily: fonts.regular}}>{address}</Text>
+                                                <Text style={{fontFamily: fonts.regular}}>{city}</Text>
+                                            </>
+                                        ): (
+                                            <Text>Loading....</Text>
+                                        )
+                                    }
+                                </View>
+                            </View>
+
+                            <MaterialIcons name="navigate-next" size={44} color="black" />
+                        </TouchableOpacity>
+                    </View>
+                    <View>
+                        {/* {parsedSelectedItems.map((orderDetail, index) => (
+                            <Accordian
+                                key={index}
+                                shopName={shopName}
+                                orders={orderDetail}
+                            />
+                        ))} */}
+                    </View>
+                </View>
             <TouchableOpacity onPress={handleAddRequest} style={[globalStyles.button, {marginTop: "auto"}]}>
                 <Text style={globalStyles.buttonText}>{loading ? "Processing..." : "Submit Request"}</Text>
             </TouchableOpacity>
         </View>
     )
-}
+}34
