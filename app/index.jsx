@@ -5,12 +5,12 @@ import { userRoles } from "@/data/userRoles";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -67,10 +67,6 @@ export default function Index() {
         router.navigate("/(auth)/(NGO)/signUp")
     }
   };
-
-  // useEffect(() => {
-  //   router.replace("/NGO")
-  // }, [])
 
   return (
     <SafeAreaView style={globalStyles.container}>
