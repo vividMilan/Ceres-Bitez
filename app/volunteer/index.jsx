@@ -1,24 +1,16 @@
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
-import {
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
-} from "firebase/firestore";
+import { useRouter } from "expo-router";
+import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const readyForDelivery = ["packed", "prepared"]
 
 export default function index() {
     const mapRef = useRef(null);
@@ -32,223 +24,318 @@ export default function index() {
     const [showRequestCard, setShowRequestCard] = useState(true);
     const [loading, setLoading] = useState(false);
     const [nearbyRequests, setNearbyRequests] = useState([]);
-    const [currentRequest, setCurrentRequest] = useState(null);
+    const [currentRequestId, setCurrentRequestId] = useState(null);
+    const [currentRequest, setCurrentRequest] = useState(null)
     const [isBusy, setIsBusy] = useState(false);
 
     const acceptTimeout = useRef(null);
 
-    const voluteerId = "V9iAalOh7ufEfJ4XCiVp";
+    const router = useRouter()
 
-    const freeVolunteer = async () => {
-        try {
-            const volunteerRef = doc(db, "volunteers", voluteerId);
+    const volunteerId = "V9iAalOh7ufEfJ4XCiVp";
 
-            await updateDoc(volunteerRef, {
-                isBusy: false,
-            });
+    useEffect(() => {
+        const getCurrentLocation = async () => {
+            try {
+                const {status} =
+                    await Location.requestForegroundPermissionsAsync()
 
-            setIsBusy(false);
-        } catch (error) {
-            throw error;
+                if (status !== "granted") {
+                    Alert.alert("Location Permission is required")
+                    return;
+                }
+
+                const location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.High
+                })
+
+                const {latitude, longitude} = location.coords
+
+                const region = {
+                    latitude,
+                    longitude,
+                    latitudeDelta: 0.1,
+                    longitudeDelta: 0.1
+                }
+
+                setCurrentRegion(region)
+                setCurrentLocation({latitude, longitude})
+
+                mapRef.current?.animateToRegion(region, 500)
+
+            } catch (error) {
+                console.log("From getCurrentLocation : ", error)
+            }
         }
-    };
+
+        getCurrentLocation()
+    }, [])
+
+    useEffect(() => {
+
+        if (!currentRequestId) return
+
+        const fetchRequest = async () => {
+            const requestSnap = await getDoc(doc(db, "requests", currentRequestId))
+    
+            const request = {
+                requestId: requestSnap.id,
+                ...requestSnap.data()
+            }
+    
+            setCurrentRequest(request)
+        }
+
+
+        fetchRequest()
+
+
+    }, [currentRequestId])
 
     const handleButton = async () => {
         try {
-            const voluteerRef = doc(db, "volunteers", "V9iAalOh7ufEfJ4XCiVp");
+            const volunteerRef = doc(db, "volunteers", "V9iAalOh7ufEfJ4XCiVp")
 
-            const voluteerSnap = await getDoc(voluteerRef);
-
-            const online = !isOnline;
-
-            setIsOnline(!isOnline);
-
-            if (voluteerSnap.exists()) {
-                await updateDoc(voluteerRef, {
-                    isOnline: online,
-                });
+            if (volunteerRef) {
+                await updateDoc(volunteerRef, {
+                    isOnline: isOnline
+                })
+                setIsOnline(!isOnline)
             }
-
-            await fetchRequests();
         } catch (error) {
-            console.log(error);
+            console.log("from: handleButton: ", error);
         }
-    };
+    }
+
 
     const handleAccept = async () => {
-        clearTimeout(acceptTimeout.current);
-        setShowRequestCard(false);
-        const updatedRequest = {
-            ...currentRequest,
-            status: "v-accepted",
-        };
 
-        const currentRef = doc(db, "studentRequests", currentRequest.id);
-        await updateDoc(currentRef, {
-            status: "v-accepted",
-        });
-        setCurrentRequest(updatedRequest);
-        navigate(updatedRequest);
-        setIsBusy(true);
-    };
+        let newStatus = null
 
-    const getDistanceKm = async (start, end) => {
-        try {
-            const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
-            const url = `https://api.geoapify.com/v1/routing?waypoints=${start.latitude},${start.longitude}|${end.latitude},${end.longitude}&mode=drive&apiKey=${apiKey}`;
-            const response = await fetch(url);
+        const requestRef = doc(db, "requests", currentRequestId)
 
-            const data = await response.json();
+        const request = (await getDoc(requestRef)).data()
 
-            return data.features[0].properties.distance / 1000;
-        } catch (error) {
-            throw error;
+        if (request.type === "home") {
+            if (request.status === "packed") {
+                newStatus = "rv-accepted"
+            }
+
+            if (request.status === "prepared") {
+                newStatus = "nv-accepted"
+            }
         }
-    };
 
-    const filterNearbyRequests = async (requests) => {
-        try {
-            if (!currentLocation) return;
+        if (request.type === "student") {
 
-            const nearby = [];
+        }
 
-            for (const req of requests) {
-                const shopCoords = req.restuarant.location;
+        if (!newStatus) return;
 
-                const distKm = await getDistanceKm(currentLocation, shopCoords);
+        await updateDoc(requestRef, {
+            status: newStatus,
+            volunteerId: volunteerId
+        })
 
-                if (distKm < 100) {
-                    nearby.push({
-                        ...req,
-                        distance: distKm.toFixed(2),
-                    });
+        setIsBusy(true)
+        setShowRequestCard(false)
+        setIsOnline(false)
+    }
+
+    useEffect(() => {
+
+        if (isOnline === false) return
+
+        const q = query(
+            collection(db, "requests"),
+            where("status", "in", readyForDelivery)
+        )
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const requests = []
+            snapshot.forEach((doc) => {
+                requests.push({
+                    requestId: doc.id,
+                    ...doc.data()
+                })
+            })
+
+            filterNearbyRequests(requests)
+        })
+
+        return () => unsubscribe()
+
+    }, [isOnline])
+
+    useEffect(() => {
+
+        if(!currentRequestId) return
+
+
+        const requestRef = doc(db, "requests", currentRequestId)
+
+        const unsubscribe = onSnapshot(requestRef, (snapshot) => {
+            if (!snapshot.exists()) return
+
+
+            const request = {
+                requestId: snapshot.id,
+                ...snapshot.data()
+            }
+            
+            setCurrentRequest(request)
+
+            if (request.type === "home") {
+                if (request.status === "rv-accepted") {
+                    navigateToRestaurant(request)
+                }
+
+                if (request.status === "r-picked-up") {
+                    navigateToNGO(request)
+                }
+
+                if (request.status === "nv-accepted") {
+                    navigateToNGO(request)
+                }
+
+                if (request.status === "n-picked-up") {
+                    navigateToHome(request)
                 }
             }
-            nearby.sort((a, b) => a.distance - b.distance);
 
-            setNearbyRequests(nearby);
-
-            if (nearby[0]) {
-                setCurrentRequest(nearby[0]);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const fetchRequests = async () => {
-        try {
-            setLoading(true);
-
-            const studentsRequestSnap = await getDocs(
-                query(
-                    collection(db, "studentRequests"),
-                    where("status", "==", "r-accepted"),
-                ),
-            );
-
-            const studentRequests = studentsRequestSnap.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-
-            await filterNearbyRequests(studentRequests);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const navigate = (request) => {
-        setLoading(true);
-        if (!currentLocation) return;
-
-        if (request.status === "v-accepted") {
-            getRoute(currentLocation, request.restuarant.location);
-        }
-
-        if (request.status === "picked-up") {
-            getRoute(currentLocation, request.student.location);
-        }
-    };
-
-    const getCurrentLocation = async () => {
-        try {
-            const { status } =
-                await Location.requestForegroundPermissionsAsync();
-
-            if (status !== "granted") {
-                Alert.alert("Location Permission is Required");
-                return;
+            if (request.type === "student") {
+                
             }
 
-            const location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Highest,
-            });
+        }) 
 
-            const { latitude, longitude } = location.coords;
+        return () => unsubscribe()
 
-            const region = {
-                latitude: latitude,
-                longitude: longitude,
-                latitudeDelta: 0.2,
-                longitudeDelta: 0.2,
-            };
+        
 
-            setCurrentLocation(region);
-            setCurrentLocation({ latitude, longitude });
-
-            mapRef.current?.animateToRegion(region, 1000);
-        } catch (error) {
-            console.log(error.message);
-        }
-    };
-
-    const cancelRequest = () => {
-        clearTimeout(acceptTimeout.current);
-        setNearbyRequests((prev) => {
-            const updated = prev.slice(1);
-            setCurrentRequest(updated.length > 0 ? updated[0] : null);
-
-            return updated;
-        });
-    };
+    }, [currentRequestId])
 
     const getRoute = async (start, end) => {
-        const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
+        if (!start, !end) return
+
         try {
+
+            const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY
+
             const url = `https://api.geoapify.com/v1/routing?waypoints=${start.latitude},${start.longitude}|${end.latitude},${end.longitude}&mode=drive&apiKey=${apiKey}`;
 
-            const response = await fetch(url);
-
-            const data = await response.json();
+            const res = await fetch(url);
+            const data = await res.json();
 
             const route = data.features[0].geometry.coordinates[0].map(
-                ([log, lat]) => ({
-                    latitude: lat,
-                    longitude: log,
-                }),
+                ([lng, lat]) => ({
+                latitude: lat,
+                longitude: lng,
+                })
             );
 
             setRouteCoords(route);
-            mapRef.current?.fitToCoordinates(route, {
-                edgePadding: { top: 100, right: 50, bottom: 100, left: 50 },
-                animated: true,
-            });
+
         } catch (error) {
-            console.log(error.message);
+
         }
-    };
+    }
 
-    const isNear = (a, b, threshold = 0.0005) => {
-        if (!a || !b) return false;
+    /*---------------------- Navigation Handling ----------------------*/
 
-        return (
-            Math.abs(a.latitude - b.latitude) < threshold &&
-            Math.abs(a.longitude - b.longitude) < threshold
-        );
-    };
+    const navigateToRestaurant = (request) => {
+        getRoute(currentLocation, request.restuarant.location)
+    }
+
+    const navigateToNGO = (request) => {
+        getRoute(request.restuarant.location, request.NGO.location)
+    }
+
+    const navigateToHome = (request) => {
+        getRoute(request.NGO.location, request.home.location)
+    }
+
+    const filterNearbyRequests = async (requests) => {
+        if (!requests) return
+
+        const nearby = []
+        
+        for (const request of requests) {
+
+            let destination = null
+
+            if (request.type === "home") {
+                if (request.status === "packed") {
+                    destination = request.restuarant.location
+                }
+
+                if (request.status === "prepared") {
+                    destination = request.NGO.location
+                }
+            }
+            
+            if (request.type === "student") {
+            
+                // todo
+                
+            }
+
+            
+            const distance = await getDistanceKM(currentLocation, destination)
+
+            if (distance < 10) {
+                nearby.push({
+                    requestId: request.id,
+                    distance: distance,
+                    ...request
+                })
+
+            }
+        }
+
+
+        // Sort the nearbyRequests distance acsending
+        nearby.sort((a, b) => a.distance - b.distance)
+
+        const formattedNearby = nearby.map(item => ({
+            ...item,
+            distance: item.distance.toFixed(2)
+        }))
+        
+        setNearbyRequests(formattedNearby)
+
+        if (nearby.length) {
+            setCurrentRequestId(nearby[0].requestId)
+            setShowRequestCard(true)
+        }
+    }
+
+    const getDistanceKM = async (start, end) => {
+        try {
+            const apiKey = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY
+
+            const url = `https://api.geoapify.com/v1/routing?waypoints=${start.latitude},${start.longitude}|${end.latitude},${end.longitude}&mode=drive&apiKey=${apiKey}`
+
+            const response = await fetch(url)
+
+            const data = await response.json()
+
+            return data.features[0].properties.distance / 1000;
+        } catch (error) {
+            console.log("getDistanceKM : ", error);
+        }
+    }
+
+    /*-------------------------------- GPS Simulation --------------------*/
+
+    // Simulate Rider
+    useEffect(() => {
+        if (routeCoords.length > 0) {
+            simulateRider();
+        }
+
+        return () => stopFakeTracking();
+    }, [routeCoords]);
 
     const simulateRider = async () => {
         let index = 0;
@@ -262,16 +349,7 @@ export default function index() {
             const point = routeCoords[index];
             setCurrentLocation(point);
 
-            mapRef.current?.animateToRegion(
-                {
-                    ...point,
-                    latitudeDelta: 0.1,
-                    longitudeDelta: 0.1,
-                },
-                500,
-            );
-
-            const volunteerRef = doc(db, "volunteers", voluteerId);
+            const volunteerRef = doc(db, "volunteers", volunteerId);
 
             await updateDoc(volunteerRef, {
                 location: point,
@@ -289,102 +367,118 @@ export default function index() {
         }
     };
 
-    // const sendLocationToFirestore = async () => {
-    //     if (!currentLocation) return
+    /*------------------------- checking proximity ----------------------------*/
 
-    //     console.log(currentLocation)
+    const isNear = (a, b, threshold = 0.0005) => {
+        if (!a || !b) return false;
 
-    //     const voluteerRef = doc(db, "volunteers", voluteerId)
-
-    //     await updateDoc(voluteerRef, {
-    //         location: {currentLocation},
-    //         lastUpdated: new Date()
-    //     })
-    // }
+        return (
+            Math.abs(a.latitude - b.latitude) < threshold &&
+            Math.abs(a.longitude - b.longitude) < threshold
+        );
+    };
 
     useEffect(() => {
-        getCurrentLocation();
-    }, []);
+        if(!currentLocation || !currentRequest) return
 
-    useEffect(() => {
-        if (routeCoords.length > 0) {
-            simulateRider();
+        let destination = null
+
+        if (currentRequest.type === "home") {
+            if (currentRequest.status === "rv-accepted") {
+                destination = currentRequest.restuarant.location
+                const arrived = isNear(currentLocation, destination)
+        
+                if (arrived) {
+                    Alert.alert(
+                        "Pick up conformation", 
+                        "Picked up the food ?", 
+                        [
+                            {text: "Yes", onPress:() => changeRequestStatus("r-picked-up")}  
+                        ]
+                    )
+                }
+            }
+            
+            if (currentRequest.status === "r-picked-up") {
+                destination = currentRequest.NGO.location
+                const arrived = isNear(currentLocation, destination)
+
+                if (arrived) {
+                    Alert.alert(
+                        "Drop Conformation",
+                        "Did the NGO collected the food",
+                        [
+                            {text: "Yes", onPress: () => changeRequestStatus("checking")}
+                        ]
+                    )
+
+                    setIsBusy(false)
+                    setRouteCoords([])
+                    setIsOnline(true)
+                    setShowRequestCard(false)
+                }
+            }
+
+            if (currentRequest.status === "nv-accepted") {
+                destination = currentRequest.NGO.location
+                const arrived = isNear(currentLocation, destination)
+
+                if (arrived) {
+                    Alert.alert(
+                        "Pick up confirmation",
+                        "Did you picked up the food ??",
+                        [
+                            {text: "Yes", onPress: () => changeRequestStatus("n-picked-up")}
+                        ]
+                    )
+
+                    setIsBusy(false)
+                    setRouteCoords([])
+                    setIsOnline(true)
+                    setShowRequestCard(false)
+                }
+            }
+            
+            if (currentRequest.status === "n-picked-up") {
+                destination = currentRequest.home.location
+                const arrived = isNear(currentLocation, destination)
+
+                if (arrived) {
+                    Alert.alert(
+                        "Delivery Notification",
+                        "Did you deliver the food ?",
+                        [
+                            {text: "Yes", onPress: () => changeRequestStatus("delivered")}
+                        ]
+                    )
+                    setIsBusy(false)
+                    setRouteCoords([])
+                    setIsOnline(true)
+                    setShowRequestCard(false)
+                }
+
+
+            }
         }
+        
+        if (currentRequest.type === "student") {
+            
+        }
+        
+        
+        if (!destination) return
+        
 
-        return () => stopFakeTracking();
-    }, [routeCoords]);
 
-    useEffect(() => {
-        if (!currentRequest || !currentLocation) return;
+    }, [currentLocation])
 
-        const checkStatus = async () => {
-            if (
-                currentRequest.status === "v-accepted" &&
-                isNear(currentLocation, currentRequest.restuarant.location)
-            ) {
-                Alert.alert("Picked Up");
-                const updated = { ...currentRequest, status: "picked-up" };
-                const currentRef = doc(
-                    db,
-                    "studentRequests",
-                    currentRequest.id,
-                );
-                await updateDoc(currentRef, {
-                    status: "picked-up",
-                });
-                setCurrentRequest(updated);
-                navigate(updated);
-            }
+    const changeRequestStatus = async (newStatus) => {
+        const requestRef = doc(db, "requests", currentRequestId)
 
-            if (
-                currentRequest.status === "picked-up" &&
-                isNear(currentLocation, currentRequest.student.location)
-            ) {
-                Alert.alert("Delivery Completed");
-                const currentRef = doc(
-                    db,
-                    "studentRequests",
-                    currentRequest.id,
-                );
-                await updateDoc(currentRef, {
-                    status: "delivered",
-                });
-                setCurrentRequest(null);
-                setRouteCoords([]);
-                freeVolunteer();
-            }
-        };
-
-        checkStatus();
-    }, [currentLocation, isBusy]);
-
-    // real time status changing
-    // useEffect(() => {
-
-    //     if (!isOnline) return
-
-    //     const q = query(
-    //         collection(db, "studentRequests"),
-    //         where("status", "==", "r-accepted")
-    //     )
-
-    //     const unsubscribe = onSnapshot(q, (snapshot) => {
-    //         const requests = snapshot.docs.map(doc => ({
-    //             id: doc.id,
-    //             ...doc.data()
-    //         }))
-
-    //         filterNearbyRequests(requests)
-    //     })
-
-    //     return () => unsubscribe()
-    // }, [isOnline, currentLocation])
-
-    // Update location every 10 seconds
-    // useEffect(() => {
-    //     const interval = setInterval(sendLocationToFirestore, 10000)
-    //     return () => clearInterval(interval)
-    // }, [currentLocation])
+        await updateDoc(requestRef, {
+            status: newStatus
+        })
+    }
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -408,77 +502,6 @@ export default function index() {
                     />
                 )}
             </MapView>
-            {currentRequest && showRequestCard && (
-                <View style={styles.cardContainer}>
-                    <View style={styles.orderCard}>
-                        <View
-                            style={{
-                                display: "flex",
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <View style={globalStyles.flexDisplay}>
-                                <Text>
-                                    {currentRequest.student.studentName}
-                                </Text>
-                                <FontAwesome6
-                                    name="graduation-cap"
-                                    size={24}
-                                    color="black"
-                                />
-                            </View>
-                            <View>
-                                <AntDesign
-                                    onPress={cancelRequest}
-                                    name="close"
-                                    size={24}
-                                    color="black"
-                                />
-                            </View>
-                        </View>
-
-                        <View>
-                            <View style={globalStyles.flexDisplay}>
-                                <AntDesign
-                                    name="shop"
-                                    size={24}
-                                    color="black"
-                                />
-                                <Text>
-                                    {currentRequest.restuarant.restuarantName}
-                                </Text>
-                            </View>
-                            <View>
-                                <Text
-                                    style={[
-                                        globalStyles.subTitleText,
-                                        { color: Colors.default.primary },
-                                    ]}
-                                >
-                                    {currentRequest.distance} Km
-                                </Text>
-                            </View>
-                            <View style={globalStyles.flexDisplay}>
-                                <FontAwesome5
-                                    name="location-arrow"
-                                    size={24}
-                                    color="black"
-                                />
-                                <Text>
-                                    {currentRequest.restuarant.restuarantName}
-                                </Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity
-                            style={[globalStyles.button, { marginTop: "auto" }]}
-                            onPress={handleAccept}
-                        >
-                            <Text style={globalStyles.buttonText}>Accept</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            )}
             <Ionicons
                 style={styles.menuButton}
                 name="menu"
@@ -486,7 +509,7 @@ export default function index() {
                 color="black"
             />
 
-            {!isBusy && (
+            {isBusy === false && (
                 <TouchableOpacity
                     onPress={handleButton}
                     style={isOnline ? styles.stopButton : styles.goButton}
@@ -499,6 +522,22 @@ export default function index() {
                         {isOnline ? "Stop" : "GO"}
                     </Text>
                 </TouchableOpacity>
+            )}
+
+            { currentRequest?.type === "home" && showRequestCard && (
+                <View style={styles.cardContainer}>
+                    <View style={styles.requestCard}>
+                        <Text>
+                            Destination : {currentRequest?.restuarant?.name}
+                        </Text>
+                        <Text>
+                            Distance : {currentRequest?.distance}
+                        </Text>
+                        <TouchableOpacity onPress={handleAccept} style={globalStyles.button}>
+                            <Text style={globalStyles.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
             )}
         </SafeAreaView>
     );
@@ -547,7 +586,7 @@ const styles = StyleSheet.create({
         width: "90%",
         alignSelf: "center",
     },
-    orderCard: {
+    requestCard: {
         backgroundColor: "#ffffffe2",
         gap: 12,
         padding: 15,

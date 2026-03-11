@@ -23,8 +23,8 @@ export const globalStyles = StyleSheet.create({
     },
     container: {
         paddingHorizontal: 20,
-        paddingVertical: 10,
-        marginTop: 10,
+        paddingVertical: 0,
+        marginTop: 25,
         flex: 1,
         flexDirection: "column",
     },
