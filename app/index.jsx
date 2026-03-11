@@ -12,6 +12,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 /* Component for rendering each user type item */
 const Item = ({ id, title, icon, isSelected, onSelect }) => {
@@ -53,7 +54,7 @@ export default function Index() {
         }
 
         if (selectedId === "volunteer") {
-            router.navigate("/volunteer");
+            router.navigate("/(auth)/(volunteer)/signUp");
         }
 
         if (selectedId === "home") {
@@ -66,7 +67,7 @@ export default function Index() {
     };
 
     return (
-        <View style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.headingText}>Who Are You ?</Text>
             <FlatList
                 data={userRoles}
@@ -84,7 +85,7 @@ export default function Index() {
             <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
                 <Text style={globalStyles.buttonText}>Next</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 }
 
