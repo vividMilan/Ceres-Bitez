@@ -1,18 +1,15 @@
 import Chip from "@/components/Chip";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
+import { db } from "@/firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useState } from "react";
-import {
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
+const router = useRouter()
 
 const requestStatus = ["Ongoing", "Assigned", "Pending"];
 
@@ -22,100 +19,108 @@ const homeDetails = {
     location: "Mirihana",
 };
 
-const requestDetails = [
-    {
-        id: "REQ123456",
-        date: "2023-10-15",
-        status: requestStatus[0],
-        qty: 30,
-        description: "Requesting 30 meals for the elderly residents.",
-        ngo: "Helping Hands NGO",
-        image: "https://as1.ftcdn.net/v2/jpg/02/60/12/88/1000_F_260128861_Q2ttKHoVw2VrmvItxyCVBnEyM1852MoJ.jpg",
-        location: "Nugegoda",
-    },
-
-    {
-        id: "REQ123456",
-        date: "2023-10-45",
-        status: requestStatus[1],
-        qty: 30,
-        description: "asdfasdfasdfasdf",
-        ngo: "Example NGO",
-        image: "https://media.licdn.com/dms/image/v2/C561BAQEKvdShFoK9EQ/company-background_10000/company-background_10000/0/1630334532945/esala_foundation_cover?e=1767625200&v=beta&t=PKRkYkMT5YNrAw_qHTF8zFfnrNz0QQLVxueCK9FYx4o",
-        location: "Mirihana",
-    },
-
-    {
-        id: "REQ123456",
-        date: "2023-10-78",
-        status: requestStatus[2],
-        qty: 30,
-        description: "adgggdddgggdgdg",
-        ngo: "Friends NGO",
-        image: "https://assets.impactpool.org/cdn-cgi/image/height=,quality=75,format=auto,fit=cover/logos/friends-international-4c88775f-7cc4-4114-8d1b-cc1c45a1488b.png",
-        location: "Kirulapona",
-    },
+const ongoingStatuses = [
+    "n-accepted",
+    "r-accepted",
+    "packed", 
+    "rv-accepted",
+    "r-picked-up",
+    "checking",
+    "prepared", 
+    "nv-accepted",
+    "delivered"
 ];
 
 export default function index() {
     const [selected, setSelected] = useState("Ongoing");
+    const [requests, setRequests] = useState([]);
 
     const renderRequest = ({ item }) => {
+        // Safely convert Firestore timestamp to JS Date
+        
+        const requestDate = item.date?.toDate ? item.date.toDate() : new Date(item.date);
+
         return (
-            <TouchableOpacity
+            <TouchableOpacity 
                 style={styles.shopCard}
                 key={item.id}
-                // onPress={() => router.push({
-                //     pathname: "/NGO/requestDetails",
-                //     params: {
-                //         requestId: item.id,
-                //         homeId: item.homeData?.id,
-                //         homeName: item.homeData?.name,
-                //         homeImage: item.homeData?.image,
-                //         homeLocation: item.homeData?.location,
-                //         requestDate: item.date
-                //     }
-                // })}
+                onPress={() => handleRequestClick(item)}
             >
-                <Image
-                    source={{ uri: item.image }}
-                    style={{ width: "100%", height: 200, borderRadius: 5 }}
+                <Image 
+                    source={{ uri: item.image || "https://via.placeholder.com/400x200" }} 
+                    style={{ width: "100%", height: 200, borderRadius: 5 }} 
                 />
 
                 <View style={styles.title}>
-                    <Text style={styles.shopName}>{item.ngo}</Text>
+                    <Text style={styles.shopName}>{item.ngo || "Unknown NGO"}</Text>
                 </View>
+
                 <View style={styles.ratingRow}>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 2,
-                        }}
-                    >
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
                         <MaterialIcons name="group" size={16} color="black" />
-                        <Text
-                            style={{
-                                color: "black",
-                                fontFamily: fonts.semiBold,
-                            }}
-                        >
-                            {item.qty}
-                        </Text>
+                        <Text style={{ color: "black", fontFamily: fonts.semiBold }}>{item.qty || 0}</Text>
                     </View>
-                    <View
-                        style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 2,
-                        }}
-                    >
+
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
                         <Entypo name="calendar" size={16} color="black" />
-                        <Text style={{ color: "#565556D" }}>{item.date}</Text>
+                        <Text style={{ color: "#565556D" }}>
+                            {requestDate.toLocaleDateString()}
+                        </Text>
                     </View>
                 </View>
             </TouchableOpacity>
         );
+    };
+
+
+    useEffect(() => {
+
+        let q;
+
+        if (selected === "Ongoing") {
+            q = query(
+                collection(db, "requests"),
+                where("type", "==", "home"),
+                where("status", "in", ongoingStatuses),
+                orderBy("createdAt", "desc")
+            );
+        } else {
+            q = query(
+                collection(db, "requests"),
+                where("type", "==", "home"),
+                where("status", "==", selected.toLocaleLowerCase()), // for other sections
+                orderBy("createdAt", "desc")
+            );
+        }
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const fetchedRequests = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            console.log(fetchedRequests)
+
+            setRequests(fetchedRequests);
+        });
+
+        return () => unsubscribe();
+    }, [selected]);
+
+
+   const handleRequestClick = (request) => {
+        if (request.status === "pending") {
+            console.log("This request is pending");
+        } else if (request.status === "assigned") {
+            console.log("This request is assigned");
+        } else if (ongoingStatuses.includes(request.status)) {
+            router.push({
+                pathname: "/home/(deliveryProgress)",
+                params: {status: request.status, requestId: request.id}
+            })
+        } else {
+            console.log(`Unknown status: ${request.status}`);
+        }
     };
 
     return (
@@ -130,8 +135,8 @@ export default function index() {
                 />
             </View>
             <FlatList
-                data={requestDetails.filter((req) => req.status === selected)}
-                id={(item) => item.id}
+                data={requests}
+                keyExtractor={(item) => item.id}
                 renderItem={renderRequest}
             />
         </SafeAreaView>

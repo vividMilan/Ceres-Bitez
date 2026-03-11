@@ -12,6 +12,8 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 /* Component for rendering each user type item */
 const Item = ({ id, title, icon, isSelected, onSelect }) => {
@@ -32,7 +34,8 @@ const Item = ({ id, title, icon, isSelected, onSelect }) => {
 };
 
 export default function Index() {
-    const router = useRouter();
+
+  const router = useRouter()
 
     // State to keep track of the selected item
     const [selectedId, setSelectedId] = useState(null);
@@ -60,33 +63,37 @@ export default function Index() {
             router.navigate("/(auth)/(home)/signUp");
         }
 
-        if (selectedId === "ngo") {
-            router.navigate("/(auth)/(NGO)/signUp");
-        }
-    };
+    if (selectedId === "ngo") {
+        router.navigate("/(auth)/(NGO)/signUp")
+    }
+  };
 
-    return (
-        <View style={globalStyles.container}>
-            <Text style={globalStyles.headingText}>Who Are You ?</Text>
-            <FlatList
-                data={userRoles}
-                renderItem={({ item }) => (
-                    <Item
-                        title={item.title}
-                        icon={item.icon}
-                        id={item.id}
-                        isSelected={item.id === selectedId}
-                        onSelect={handleSelect}
-                    />
-                )}
-                keyExtractor={(item) => item.id}
+  // useEffect(() => {
+  //   router.replace("/NGO")
+  // }, [])
+
+  return (
+    <SafeAreaView style={globalStyles.container}>
+        <Text style={globalStyles.headingText}>Who Are You ?</Text>
+        <FlatList
+          data={userRoles}
+          renderItem={({ item }) => (
+            <Item
+              title={item.title}
+              icon={item.icon}
+              id={item.id}
+              isSelected={item.id === selectedId}
+              onSelect={handleSelect}
             />
-            <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
-                <Text style={globalStyles.buttonText}>Next</Text>
-            </TouchableOpacity>
-        </View>
-    );
-}
+          )}
+          keyExtractor={(item) => item.id}
+        />
+      <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
+        <Text style={globalStyles.buttonText}>Next</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
+};
 
 const style = StyleSheet.create({
     userTypeContainer: {

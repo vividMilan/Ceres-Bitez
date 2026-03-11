@@ -34,7 +34,7 @@ export default function login() {
                 />
                 <TouchableOpacity
                     style={globalStyles.button}
-                    onPress={() => router.push("/NGO")}
+                    onPress={() => router.push("/NGO/(tabs)/home")}
                 >
                     <Text style={globalStyles.buttonText}>
                         {loading ? "Logging in..." : "Login"}

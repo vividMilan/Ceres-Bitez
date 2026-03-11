@@ -20,9 +20,9 @@ export default function SignUp() {
         alert("Sign Up Clicked!");
     };
 
-    return (
-        <SafeAreaView style={globalStyles.container}>
-            <Text style={globalStyles.titleText}>Sign Up</Text>
+  return (
+    <SafeAreaView style={globalStyles.container}>
+      <Text style={globalStyles.titleText}>Sign Up</Text>
 
             <TextInput
                 placeholder="NGO"
@@ -81,25 +81,19 @@ export default function SignUp() {
                 <Text style={globalStyles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
 
-            <View>
-                <Text
-                    style={[
-                        globalStyles.regularText,
-                        { textAlign: "center", marginTop: 10 },
-                    ]}
-                >
-                    Already have an account?{" "}
-                    <Text
-                        style={{
-                            color: Colors.default.primary,
-                            fontFamily: fonts.semiBold,
-                        }}
-                        onPress={() => router.push("/login")}
-                    >
-                        Login
-                    </Text>
-                </Text>
-            </View>
-        </SafeAreaView>
-    );
+      <View>
+        <Text
+          style={[globalStyles.regularText, { textAlign: "center", marginTop: 10 }]}
+        >
+          Already have an account?{" "}
+          <Text
+            style={{ color: Colors.default.primary, fontFamily: fonts.semiBold }}
+            onPress={() => router.push("/login")}
+          >
+            Login
+          </Text>
+        </Text>
+      </View>
+    </SafeAreaView>
+  );
 }

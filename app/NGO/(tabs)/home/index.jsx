@@ -2,77 +2,56 @@ import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { db } from "@/firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
     FlatList,
     Image,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function index() {
-    const [searchText, setSearchText] = useState("");
-    const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState([]);
 
     const router = useRouter();
 
+    // fetch all requests
     useEffect(() => {
-        const fetchRequests = async () => {
-            try {
-                setLoading(true);
-                const querySnapshot = await getDocs(collection(db, "requests"));
-                const homeListsSnapshot = await getDocs(collection(db, "home"));
+        const q = query(
+            collection(db, "requests"),
+            where("type", "==", "home"),
+            where("status", "==", "pending"),
+        );
 
-                const homeLists = [];
-                homeListsSnapshot.forEach((doc) => {
-                    homeLists.push({ id: doc.id, ...doc.data() });
-                });
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
 
-                const requestsData = [];
-                querySnapshot.forEach((doc) => {
-                    requestsData.push({
-                        id: doc.id,
-                        homeData: homeLists.find(
-                            (home) => home.id === doc.data().homeID,
-                        ),
-                        ...doc.data(),
-                    });
-                });
+            setRequests(data);
+        });
 
-                setRequests(requestsData);
-
-                console.log("Fetched Requests: ", requestsData);
-            } catch (error) {
-                console.log("Error fetching requests: ", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchRequests();
+        return () => unsubscribe();
     }, []);
 
     const renderRequest = ({ item }) => {
         return (
             <TouchableOpacity
                 style={styles.shopCard}
-                key={item.id}
                 onPress={() =>
                     router.push({
-                        pathname: "/NGO/requestDetails",
+                        pathname: "/NGO/(tabs)/home/pendingRequest",
                         params: {
                             requestId: item.id,
-                            homeId: item.homeData?.id,
-                            homeName: item.homeData?.name,
-                            homeImage: item.homeData?.image,
+                            homeId: item.home?.homeID,
+                            homeName: item.home?.name,
+                            homeImage: item.home?.image,
                             homeLocation: item.homeData?.location,
                             requestDate: item.date,
                         },
@@ -80,12 +59,12 @@ export default function index() {
                 }
             >
                 <Image
-                    source={{ uri: item.homeData?.image }}
+                    source={{ uri: item.home?.image }}
                     style={{ width: "100%", height: 200, borderRadius: 5 }}
                 />
 
                 <View style={styles.title}>
-                    <Text style={styles.shopName}>{item.homeData?.name}</Text>
+                    <Text style={styles.shopName}>{item.home?.name}</Text>
                 </View>
                 <View style={styles.ratingRow}>
                     <View
@@ -113,7 +92,11 @@ export default function index() {
                         }}
                     >
                         <Entypo name="calendar" size={16} color="black" />
-                        <Text style={{ color: "#565556D" }}>{item.date}</Text>
+                        <Text style={{ color: "#565556D" }}>
+                            {item.date
+                                ? item.date.toDate().toLocaleDateString()
+                                : "No Date"}
+                        </Text>
                     </View>
                 </View>
             </TouchableOpacity>
@@ -121,24 +104,14 @@ export default function index() {
     };
 
     return (
-        <SafeAreaView style={globalStyles.container}>
-            <View style={globalStyles.searchBoxRow}>
-                <FontAwesome name="search" size={24} color="black" />
-                <TextInput
-                    value={searchText}
-                    onChangeText={setSearchText}
-                    style={{ color: "grey", width: "100%" }}
-                    placeholder="Seach Requests"
-                />
-            </View>
-            <Text style={globalStyles.titleText}>Food Requests Queue</Text>
-
+        <SafeAreaProvider style={globalStyles.container}>
+            <Text style={globalStyles.titleText}>Pending Queue</Text>
             <FlatList
                 data={requests}
                 keyExtractor={(item) => item.id}
                 renderItem={renderRequest}
             />
-        </SafeAreaView>
+        </SafeAreaProvider>
     );
 }
 
@@ -147,7 +120,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#D9D9D9",
         flexDirection: "column",
         width: "100%",
-        height: "fit-content",
         borderRadius: 10,
         padding: 10,
         marginBottom: 20,

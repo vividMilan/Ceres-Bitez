@@ -30,5 +30,5 @@ export default function login() {
                 <Text style={globalStyles.buttonText}>Login</Text>
             </TouchableOpacity>
         </SafeAreaView>
-    );
+    )
 }
