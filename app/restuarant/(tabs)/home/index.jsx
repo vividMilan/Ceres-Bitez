@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
         useEffect(() => {
             const q = query(
                 collection(db, "requests"),
-                where("status", "==", "pending")
+                where("status", "==", "n-requested")
             )
 
             const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -104,8 +104,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
                                 }
                             })
                         }}
+
+                        style={styles.requestCard}
                     >
-                        <Image source={{uri: item.NGO?.imageUrl}}  />
+                        <Image source={{uri: item.NGO?.imageUrl}} style={{width: "auto", height: 200}}/>
                         <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
                             {item.NGO?.name || "Unkown NGO"}
                         </Text>

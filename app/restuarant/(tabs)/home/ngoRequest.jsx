@@ -5,7 +5,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,6 +20,8 @@ export default function ngoRequest() {
 
     const parsedSelectedFood = JSON.parse(selectedFood)
     const parsedHomeDetails = JSON.parse(home)
+
+    const restuarantId = "7ADL1PRfW0V6deM9bR2UjxdSXS72"
 
 
     const fetchHomeAddress = async () => {
@@ -61,8 +63,11 @@ export default function ngoRequest() {
         try {
             const requestRef = doc(db, "requests", requestId)
 
+            const restuarant = (await getDoc(doc(db, "restaurants", restuarantId))).data()
+
             await updateDoc(requestRef, {
-                status: "r-accepted"
+                status: "r-accepted",
+                restuarant: restuarant
             })
 
             Alert.alert("Successfully Accepted ✅")
@@ -72,7 +77,6 @@ export default function ngoRequest() {
             console.log(err)
         }
     }
-
 
     if (date) {
         try {

@@ -61,6 +61,15 @@ export default function index() {
                 setCurrentRegion(region)
                 setCurrentLocation({latitude, longitude})
 
+                const volunteerRef = doc(db, "volunteers", volunteerId)
+
+                await updateDoc(volunteerRef, {
+                    location: {
+                        latitude,
+                        longitude
+                    }
+                })
+
                 mapRef.current?.animateToRegion(region, 500)
 
             } catch (error) {
@@ -216,7 +225,7 @@ export default function index() {
     }, [currentRequestId])
 
     const getRoute = async (start, end) => {
-        if (!start, !end) return
+        if (!start || !end) return
 
         try {
 
@@ -279,6 +288,8 @@ export default function index() {
                 // todo
                 
             }
+
+            if (!destination) continue
 
             
             const distance = await getDistanceKM(currentLocation, destination)
@@ -497,7 +508,6 @@ export default function index() {
 
                 {currentLocation && (
                     <Marker
-                        key={`${currentLocation.latitude} - ${currentLocation.longitude}`}
                         coordinate={currentLocation}
                     />
                 )}

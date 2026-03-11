@@ -25,7 +25,7 @@ export default function login() {
         try {
             setLoading(true);
             // await signInWithEmailAndPassword(auth, username, pwd)
-            router.push("/restuarant/");
+            router.push("/restuarant/(tabs)/home");
         } catch (err) {
             Alert.alert(err);
         } finally {

@@ -195,8 +195,6 @@ export default function index() {
                 placeholder="If there are any special instructions"
                 placeholderTextColor="grey"
             />
-
-            <View>
                 <View style={{marginBottom: 20}}>
                         <TouchableOpacity style={{flexDirection: "row", alignItems: "center", justifyContent: "space-between"}}>
                             <View style={{flexDirection: "row", alignItems: "center", gap: 10}}>
@@ -217,20 +215,10 @@ export default function index() {
 
                             <MaterialIcons name="navigate-next" size={44} color="black" />
                         </TouchableOpacity>
-                    </View>
-                    <View>
-                        {/* {parsedSelectedItems.map((orderDetail, index) => (
-                            <Accordian
-                                key={index}
-                                shopName={shopName}
-                                orders={orderDetail}
-                            />
-                        ))} */}
-                    </View>
                 </View>
             <TouchableOpacity onPress={handleAddRequest} style={[globalStyles.button, {marginTop: "auto"}]}>
                 <Text style={globalStyles.buttonText}>{loading ? "Processing..." : "Submit Request"}</Text>
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     )
 }34
