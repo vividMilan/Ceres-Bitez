@@ -7,27 +7,15 @@ import { Picker } from "@react-native-picker/picker";
 import Checkbox from "expo-checkbox/build/ExpoCheckbox";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-
-
 import { sendOTP } from "@/app/(auth)/authController/sendOTP";
-import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from "react-native";
+import {ActivityIndicator,Alert,KeyboardAvoidingView,Platform,ScrollView,
+    StyleSheet, Text,TextInput,TouchableOpacity,View} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 
 // Key to store pending home sign-up data in AsyncStorage
-const PENDING_HOME_SIGNUP_KEY = "pendingHomeSignUp";
+const PENDING_SIGNUP_KEY = "pendingSignUp";
 
 
 
@@ -132,7 +120,7 @@ export default function signUp() {
 
 
             await AsyncStorage.setItem(
-                PENDING_HOME_SIGNUP_KEY,
+                PENDING_SIGNUP_KEY,
                 JSON.stringify({
                     email,
                     password,

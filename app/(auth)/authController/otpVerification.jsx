@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const OTP_LENGTH = 6;
-const PENDING_HOME_SIGNUP_KEY = "pendingHomeSignUp";
+const PENDING_SIGNUP_KEY = "pendingSignUp";
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
@@ -24,7 +24,7 @@ const OtpVerification = () => {
   const inputs = useRef([]);
   const router = useRouter();
   const { email, generatedOTP } = useLocalSearchParams();
- 
+
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
 
@@ -46,12 +46,12 @@ const OtpVerification = () => {
     if (text && index < OTP_LENGTH - 1) {
       inputs.current[index + 1].focus();
     }
-   
-    
-  }; 
 
 
-  
+  };
+
+
+
 
   const handleKeyPress = (e, index) => {
     if (e.nativeEvent.key === "Backspace" && !otp[index] && index > 0) {
@@ -74,38 +74,47 @@ const OtpVerification = () => {
     try {
       setLoading(true);
 
-      const pendingSignUp = await AsyncStorage.getItem(PENDING_HOME_SIGNUP_KEY);
+      const pendingSignUp = await AsyncStorage.getItem(PENDING_SIGNUP_KEY);
       if (!pendingSignUp) {
         throw new Error("Your signup session expired. Please try again.");
       }
 
-      const { email: pendingEmail, password, userData } = JSON.parse(pendingSignUp);
+      try {
+        const { email: pendingEmail, password, userData } = JSON.parse(pendingSignUp);
 
-      await firebaseSignUp(pendingEmail, password, userData);
-      await AsyncStorage.removeItem(PENDING_HOME_SIGNUP_KEY);
+        await firebaseSignUp(pendingEmail, password, userData);
+        await AsyncStorage.removeItem(PENDING_SIGNUP_KEY);
 
-      Alert.alert("Success", "Account created successfully!");
-      const userRole = userData.userRole || "user"; // Get role from signup data
-      
-      // if (userRole === "ngo") {
-      //   router.push("#");
+        Alert.alert("Success", "Account created successfully!");
+        const userRole = userData.userRole || "user"; // Get role from signup data
 
-      // }else if(userRole === "home"){
-      //   router.push("#");
-      // }
+        // if (userRole === "ngo") {
+        //   router.push("#");
 
-      router.push("/(auth)/authController/testLogin");
+        // }else if(userRole === "home"){
+        //   router.push("#");
+        // }
+        console.log(userRole + " signed up successfully with email: " + pendingEmail);
+        router.push("/(auth)/authController/testLogin");
 
-      console.log(userRole + " signed up successfully with email: " + pendingEmail);
-      
-      
+      } catch (error) {
+        console.error("Signup failed during OTP verification:", error);
+        Alert.alert("Signup Failed", error.message || "Unable to create account.");
+        router.back();
+      }
+
+
+
+
+
+
     } catch (error) {
       console.error("OTP verification failed:", error);
       Alert.alert("Verification Failed", error.message || "Unable to complete signup.");
     } finally {
       setLoading(false);
     }
-  }; 
+  };
 
 
 
@@ -208,7 +217,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 14,
-    borderRadius: 10, 
+    borderRadius: 10,
     marginTop: 50,
   },
   buttonDisabled: {

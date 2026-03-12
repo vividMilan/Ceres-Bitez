@@ -4,14 +4,18 @@
  * and that auth.currentUser is populated correctly.
  */
 
+import { globalStyles } from "@/constants/globalStyle";
 import { auth, db } from "@/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import {useRouter} from "expo-router";
+
 import {
     ActivityIndicator,
     ScrollView,
     StyleSheet,
     Text,
+    TouchableOpacity,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -20,6 +24,21 @@ export default function TestLogin() {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const router = useRouter()
+
+
+    const handleLogout = async () => {
+        try {
+            await auth.signOut();
+
+            console.log("User logged out successfully.");
+            router.back();
+        } catch (err) {
+            console.error("Logout failed:", err);
+        }
+    };
+
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -36,7 +55,7 @@ export default function TestLogin() {
                 const ngo = await getDoc(doc(db, "ngo", currentUser.uid));
                 const restaurants = await getDoc(doc(db, "restaurants", currentUser.uid));
                 const volunteers = await getDoc(doc(db, "volunteers", currentUser.uid));
-                const students = await getDoc(doc(db, "students", currentUser.uid)); 
+                const students = await getDoc(doc(db, "student", currentUser.uid)); 
 
                 let snp = null;
 
@@ -91,8 +110,19 @@ export default function TestLogin() {
                         </View>
                     ))}
                 </View>
+                 <TouchableOpacity
+                style={globalStyles.button}
+                onPress={handleLogout}
+            >
+                <Text style={styles.logoutButtonText}>Logout</Text>
+            </TouchableOpacity>
+
             </ScrollView>
+
+           
         </SafeAreaView>
+
+
     );
 }
 

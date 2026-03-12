@@ -3,11 +3,9 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import { useState } from "react";
-
 import { firebaseLogin } from "../authController/authMethods";
 
 export default function login() {
@@ -20,13 +18,10 @@ export default function login() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [secureMode_password, setSecureMode_password] = useState(true);
 
+
     const handleChange = (field, value) => {
-
-
-
         // Clearing Error
         clearErrors();
-
         setShowSuccess(false);
 
         if (field === "email") setEmail(value);
@@ -50,17 +45,18 @@ export default function login() {
         else {
             if (!passwordRegex.length.test(password)) newError.password = "Password must be at least 6 characters.";
         }
-
         setError(newError);
         setShowSuccess(Object.keys(newError).length === 0);
         if (Object.keys(newError).length > 0) {
             return;
         }
 
+
+        // Login
         try {
             setLoading(true);
             await firebaseLogin(email, password);
-            router.push("/home");
+            router.push("/(auth)/authController/testLogin");
         } catch (error) {
             setError({ password: "Invalid email or password." });
         } finally {

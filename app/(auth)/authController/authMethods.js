@@ -8,19 +8,22 @@ import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebaseConfig";
 
 const firebaseSignUp = async (email, password, profileData = {}) => {
-  if (email === "" || password === "") {
+  const normalizedEmail = email?.trim().toLowerCase();
+  const normalizedPassword = password ?? "";
+
+  if (normalizedEmail === "" || normalizedPassword === "") {
     throw new Error("Please fill in all fields.");
   }
   // Check if email already exists
-  const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+  const signInMethods = await fetchSignInMethodsForEmail(auth, normalizedEmail);
   if (signInMethods.length > 0) {
     throw new Error("Email already exists. Please use a different email.");
   }
 
   const userCredential = await createUserWithEmailAndPassword(
     auth,
-    email,
-    password,
+    normalizedEmail,
+    normalizedPassword,
   );
 
   try {
@@ -42,18 +45,34 @@ const firebaseSignUp = async (email, password, profileData = {}) => {
 };
 
 const firebaseLogin = async (email, password) => {
-  if (email === "" || password === "") {
+  const normalizedEmail = email?.trim().toLowerCase();
+  const normalizedPassword = password ?? "";
+
+  if (normalizedEmail === "" || normalizedPassword === "") {
     throw new Error("Please fill in all fields.");
   }
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(auth, normalizedEmail, normalizedPassword);
     setTimeout(() => {
-      console.log("User logged in successfully:", email);
+      console.log("User logged in successfully:", normalizedEmail);
     }, 1000);
   } catch (error) {
+        console.error("Login failed for email:", normalizedEmail, error);
+
     throw new Error("Invalid email or password.");
+  } 
+}; 
+
+
+const firebaseLogout = async () => {
+  try {
+    await auth.signOut();
+    console.log("User logged out successfully");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    throw new Error("Failed to log out. Please try again.");
   }
 };
 
-export { firebaseLogin, firebaseSignUp };
+export { firebaseLogin, firebaseLogout, firebaseSignUp };
 

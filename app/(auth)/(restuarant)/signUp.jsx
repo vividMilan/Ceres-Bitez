@@ -26,7 +26,7 @@ import {
 
 
 // Key to store pending home sign-up data in AsyncStorage
-const PENDING_HOME_SIGNUP_KEY = "pendingHomeSignUp";
+const PENDING_SIGNUP_KEY = "pendingSignUp";
 
 
 
@@ -110,7 +110,7 @@ export default function signUp() {
 
 
             await AsyncStorage.setItem(
-                PENDING_HOME_SIGNUP_KEY,
+                PENDING_SIGNUP_KEY,
                 JSON.stringify({
                     email,
                     password,

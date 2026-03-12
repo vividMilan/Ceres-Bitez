@@ -99,7 +99,6 @@ export default function login() {
                         placeholder="Password"
                         secureTextEntry={secureMode_password}
                         value={password}
-                        maxLength={12}
                         onChangeText={(value) => handleChange("password", value)}
                     />
                     <TouchableOpacity
