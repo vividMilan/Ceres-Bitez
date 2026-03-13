@@ -30,7 +30,7 @@ export default function deliverProgressLayout() {
 
                 if (screen) {
                     router.replace({
-                        pathname: `/student/(deliveryProgress)/${screen}`,
+                        pathname: `/restuarant/(deliveryProgressStudent)/${screen}`,
                         params: {
                             requestId: requestId
                         }
@@ -46,7 +46,6 @@ export default function deliverProgressLayout() {
 
     return (
         <Stack screenOptions={{headerShown: false}}>
-            <Stack.Screen name="progress1" />
             <Stack.Screen name="progress2" />
             <Stack.Screen name="progress3" />
             <Stack.Screen name="progress8" />

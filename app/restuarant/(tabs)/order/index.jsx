@@ -55,7 +55,7 @@ export default function Index() {
                         style={styles.requestCard} 
                         onPress={() => 
                             router.push({
-                                pathname: "/restuarant/(deliveryProgressStudent)",
+                                pathname: "/restuarant/(deliveryProgressStudent)/",
                                 params: { 
                                     requestId: item.requestId
                                 }
@@ -114,7 +114,7 @@ export default function Index() {
 
             <FlatList 
                 data={requests}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.requestId}
                 renderItem={renderRequest}
             />
         </SafeAreaView>
