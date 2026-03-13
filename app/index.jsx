@@ -5,15 +5,13 @@ import { userRoles } from "@/data/userRoles";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Image,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
 
 /* Component for rendering each user type item */
 const Item = ({ id, title, icon, isSelected, onSelect }) => {
@@ -56,7 +54,7 @@ export default function Index() {
         }
 
         if (selectedId === "volunteer") {
-            router.navigate("/volunteer");
+            router.navigate("/(auth)/(volunteer)/signUp");
         }
 
         if (selectedId === "home") {
@@ -68,28 +66,28 @@ export default function Index() {
     }
   };
 
-  return (
-    <SafeAreaView style={globalStyles.container}>
-        <Text style={globalStyles.headingText}>Who Are You ?</Text>
-        <FlatList
-          data={userRoles}
-          renderItem={({ item }) => (
-            <Item
-              title={item.title}
-              icon={item.icon}
-              id={item.id}
-              isSelected={item.id === selectedId}
-              onSelect={handleSelect}
+    return (
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.headingText}>Who Are You ?</Text>
+            <FlatList
+                data={userRoles}
+                renderItem={({ item }) => (
+                    <Item
+                        title={item.title}
+                        icon={item.icon}
+                        id={item.id}
+                        isSelected={item.id === selectedId}
+                        onSelect={handleSelect}
+                    />
+                )}
+                keyExtractor={(item) => item.id}
             />
-          )}
-          keyExtractor={(item) => item.id}
-        />
-      <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
-        <Text style={globalStyles.buttonText}>Next</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
-  );
-};
+            <TouchableOpacity style={globalStyles.button} onPress={handleNext}>
+                <Text style={globalStyles.buttonText}>Next</Text>
+            </TouchableOpacity>
+        </View>
+    );
+}
 
 const style = StyleSheet.create({
     userTypeContainer: {
