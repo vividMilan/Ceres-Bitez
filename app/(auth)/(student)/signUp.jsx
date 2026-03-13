@@ -13,6 +13,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
+    Alert,
+    Image,
     Pressable,
     ScrollView,
     Text,
@@ -61,6 +63,17 @@ export default function signUp() {
         return await response.blob();
     };
 
+    const clearAllFields = () => {
+        setName("")
+        setEmail("")
+        setMobile("")
+        setRegNo("")
+        setPassword("")
+        setConfirmPassword("")
+        setUniversity("")
+        setImageUri(null)
+    }
+
     const uploadRecordBook = async (uri, uid) => {
         const response = await fetch(uri);
         const arrayBuffer = await response.arrayBuffer();
@@ -69,7 +82,7 @@ export default function signUp() {
         const { error } = await supabase.storage
             .from("student-record-books")
             .upload(filePath, arrayBuffer, {
-                contentType: "image/jpeg",
+                contentType: "image/*",
                 upsert: true,
             });
 
@@ -129,10 +142,14 @@ export default function signUp() {
                 createdAt: new Date(),
             });
 
+
+
             alert("Account created successfully");
+            clearAllFields()
             router.push("/(auth)/(student)/login");
         } catch (error) {
             console.log(error);
+            Alert.alert("Error", error.message)
         } finally {
             setLoading(false);
         }
@@ -202,6 +219,13 @@ export default function signUp() {
                             color: Colors.default.inputText,
                         }}
                     >
+                        
+                    {imageUri && (
+                        <Image
+                            source={{ uri: imageUri }}
+                            style={{ width: "100%", height: 200, marginBottom: 20 }}
+                        />
+                    )}
                         Student Record Book
                     </Text>
                 </Pressable>
@@ -250,7 +274,9 @@ export default function signUp() {
                     style={[globalStyles.button]}
                     disabled={loading}
                 >
-                    <Text style={[globalStyles.buttonText]}>Sign Up</Text>
+                    <Text style={[globalStyles.buttonText]}>
+                        {loading ? "Creating account..." : "Sign Up"}
+                    </Text>
                 </TouchableOpacity>
 
                 {/* Login Button */}

@@ -29,7 +29,7 @@ export default function login() {
             // setLoading(true);
             // await signInWithEmailAndPassword(auth, email, password);
             // setLoading(false);
-            router.push("/student");
+            router.push("/student/(tabs)/home");
         } catch (error) {
             alert("Login failed. Please check your credentials and try again.");
             console.error("Login error:", error);

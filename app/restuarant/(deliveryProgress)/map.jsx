@@ -71,39 +71,47 @@ export default function map() {
 
 
     // Update destination when status changes
-    useEffect(() => {
-
-        if (!requestData) return;
-
-        const status = requestData.status;
-        const type = requestData.type;
-
-        if (type === "home") {
-
-            const destinations = {
-                "rv-accepted": requestData.restuarant?.location,
-                "r-picked-up": requestData.NGO?.location,
-                "nv-accepted": requestData.NGO?.location,
-                "v-picked-up": requestData.home?.location,
-                "n-picked-up": requestData.home?.location,
-            };
-
-            const geo = destinations[status];
-
+        useEffect(() => {
+    
+            if (!requestData) return;
+    
+            const status = requestData.status;
+            const type = requestData.type;
+    
+            let geo = null
+    
+            if (type === "home") {
+    
+                const destinations = {
+                    "rv-accepted": requestData.restuarant?.location,
+                    "r-picked-up": requestData.NGO?.location,
+                    "nv-accepted": requestData.NGO?.location,
+                    "v-picked-up": requestData.home?.location,
+                    "n-picked-up": requestData.home?.location,
+                };
+    
+                geo = destinations[status];
+    
+                
+            }
+            
+            if (type === "student") {
+                const destinations = {
+                    "rv-accepted": requestData.restuarant?.location,
+                    "picked": requestData.student?.location
+                }
+                
+                geo = destinations[status];
+            }
+            
             if (!geo) return;
-
+    
             setDestination({
                 latitude: geo.latitude,
                 longitude: geo.longitude,
             });
-
-        }
-
-        if (type === "student") {
-            // future logic
-        }
-
-    }, [requestData]);
+    
+        }, [requestData]);
 
 
 
@@ -164,9 +172,7 @@ export default function map() {
             });
 
         } catch (error) {
-
             console.log("Routing error:", error.message);
-
         }
 
     };
