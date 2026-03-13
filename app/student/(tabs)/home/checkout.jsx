@@ -4,7 +4,7 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
     addDoc,
     collection,
@@ -41,14 +41,18 @@ export default function CheckOut() {
 
     const [isSelected, setIsSelected] = useState("");
 
+    const router = useRouter()
+
     const handleRequestFood = async () => {
         try {
-            const studentId = "exampleStudent1234";
+            const studentId = "czdMs8Z3GTXLTCbyExVKaXsOAa62";
             setLoading(true);
 
             const restaurantRef = doc(db, "restaurants", shopId);
             const restaurantSnap = await getDoc(restaurantRef);
-            const restaurantData = restaurantSnap.data();
+
+            const studentRef = doc(db, "users", studentId)
+            const studentSnap = await getDoc(studentRef)
 
             const totalPrice = parsedRequest.reduce((sum, item) => {
                 return sum + item.price * item.qty;
@@ -56,31 +60,25 @@ export default function CheckOut() {
 
             const requestData = {
                 student: {
-                    studentId,
-                    studentName: "A. Ashen",
-                    location: {
-                        latitude: parsedLocation.latitude,
-                        longitude: parsedLocation.longitude,
-                    },
+                    studentId: studentSnap.id,
+                    ...studentSnap.data()
                 },
                 restuarant: {
-                    restuarantId: shopId,
-                    restuarantName: shopName,
-                    location: {
-                        latitude: restaurantData.location.latitude,
-                        longitude: restaurantData.location.longitude,
-                    },
+                    restuarantId: restaurantSnap.id,
+                    ...restaurantSnap.data()
                 },
                 foodItems: parsedRequest,
                 paymentMethod: paymentMethod,
                 status: "pending",
+                type: "student",
                 totalPrice: totalPrice,
                 createdAt: serverTimestamp(),
             };
 
-            await addDoc(collection(db, "studentRequests"), requestData);
+            await addDoc(collection(db, "requests"), requestData);
 
             Alert.alert("Successfuly Requested");
+            router.replace("/student/(tabs)/home")
         } catch (error) {
             console.log(error);
         } finally {
