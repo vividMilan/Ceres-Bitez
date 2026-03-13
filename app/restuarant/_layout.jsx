@@ -5,6 +5,7 @@ export default function RestuarantLayout() {
         <Stack>
             <Stack.Screen name="(tabs)" options={{headerShown: false}} />
             <Stack.Screen name="(deliveryProgress)" options={{headerShown: false}} />
+            <Stack.Screen name="(deliveryProgressStudent)" options={{headerShown: false}} />
         </Stack>
     )
 }
