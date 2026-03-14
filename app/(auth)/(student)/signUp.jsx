@@ -48,6 +48,7 @@ export default function signUp() {
     const [university, setUniversity] = useState("");
     const [isChecked, setChecked] = useState(false);
     const [imageUri, setImageUri] = useState(null);
+    
 
 
     // Other States
@@ -60,12 +61,13 @@ export default function signUp() {
     const [showSourcePicker, setShowSourcePicker] = useState(false);
 
     // Student data object to be sent to backend
-    const studentData = {  
+    const studentData = {
         name: studentName,
         email: email,
         mobile: mobileNumber,
         university: university,
         regNo: regNo,
+        image: "none",
         recordBookUrl: "none",
         userRole: "student",
     }
@@ -138,19 +140,31 @@ export default function signUp() {
         // Sign in logic
         try {
             setLoading(true);
+            setImageUploading(true);
+
+            // Generate a temporary UID for image upload path
+            const tempUID = Math.random().toString(36).substring(2, 15);
+            const recordBookUrl = await uploadRecordBook(imageUri, tempUID);
 
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
             // send otp to user email
             await sendOTP(email, otp);
             console.log("Generated OTP from params:", otp);
 
+            // Update studentData with the image URL
+            const updatedStudentData = {
+                ...studentData,
+                image: recordBookUrl,
+                recordBookUrl: recordBookUrl,
+            };
 
             await AsyncStorage.setItem(
                 PENDING_SIGNUP_KEY,
                 JSON.stringify({
                     email,
                     password,
-                    userData: studentData,
+                    userData: updatedStudentData,
+                    tempUID,
                 }),
             );
 
@@ -160,9 +174,10 @@ export default function signUp() {
             });
         } catch (error) {
             console.error("Error during sign up:", error);
-            Alert.alert("Sign Up Failed", "An error occurred. Please try again.");
+            Alert.alert("Sign Up Failed", error.message || "An error occurred. Please try again.");
         } finally {
             setLoading(false);
+            setImageUploading(false);
         }
 
 
@@ -232,6 +247,7 @@ export default function signUp() {
 
             if (!result.canceled) {
                 setImageUri(result.assets[0].uri);
+                console.log("Selected image URI:", result.assets[0].uri)
             }
         } catch (error) {
             alert("Error selecting image: " + error.message);
