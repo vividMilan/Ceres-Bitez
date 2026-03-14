@@ -221,7 +221,7 @@ export default function index() {
                 }
 
                 if (request.status === "picked") {
-                    
+                    navigateToStudent(request)
                 }
             }
 
@@ -297,9 +297,13 @@ export default function index() {
             }
             
             if (request.type === "student") {
-            
-                // todo
-                
+                if (request.status === "packed") {
+                    destination = request.restuarant.location
+                }
+
+                if (request.status === "picked") {
+                    destination = request.student.location
+                }   
             }
 
             if (!destination) continue
@@ -309,7 +313,7 @@ export default function index() {
 
             if (distance < 10) {
                 nearby.push({
-                    requestId: request.id,
+                    requestId: request.requestId,
                     distance: distance,
                     ...request
                 })
@@ -486,7 +490,45 @@ export default function index() {
         }
         
         if (currentRequest.type === "student") {
-            
+            if (currentRequest.status === "v-accepted") {
+                destination = currentRequest.restuarant.location
+                const arrived = isNear(currentLocation, destination)
+
+                if (arrived) {
+                    Alert.alert(
+                        "Pick Up Notification",
+                        "Did you picked the food ?",
+                        [
+                            {text: "Yes", onPress: () => changeRequestStatus("picked")}
+                        ]
+                    )
+                    setIsBusy(false)
+                    setRouteCoords([])
+                    setIsOnline(true)
+                    setShowRequestCard(false)
+                }
+
+            }
+
+            if (currentRequest.status === "picked") {
+                destination = currentRequest.student.location
+                const arrived = isNear(currentLocation, destination)
+
+                if (arrived) {
+                    Alert.alert(
+                        "Delivery Notification",
+                        "Did you deliver the food ?",
+                        [
+                            {text: "Yes", onPress: () => changeRequestStatus("delivered")}
+                        ]
+                    )
+                    setIsBusy(false)
+                    setRouteCoords([])
+                    setIsOnline(true)
+                    setShowRequestCard(false)
+                }
+
+            }
         }
         
         
@@ -548,6 +590,22 @@ export default function index() {
             )}
 
             { currentRequest?.type === "home" && showRequestCard && (
+                <View style={styles.cardContainer}>
+                    <View style={styles.requestCard}>
+                        <Text>
+                            Destination : {currentRequest?.restuarant?.name}
+                        </Text>
+                        <Text>
+                            Distance : {currentRequest?.distance}
+                        </Text>
+                        <TouchableOpacity onPress={handleAccept} style={globalStyles.button}>
+                            <Text style={globalStyles.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+
+            {currentRequest?.type === "student" && showRequestCard && (
                 <View style={styles.cardContainer}>
                     <View style={styles.requestCard}>
                         <Text>

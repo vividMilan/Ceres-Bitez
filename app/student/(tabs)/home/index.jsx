@@ -22,7 +22,7 @@ export default function Index() {
                 const foodSnapShot = await getDocs(
                     query(
                         collection(db, "foods"),
-                        where("notSuitableAt", "<", now),
+                        where("notSuitableAt", ">", now),
                     ),
                 );
 

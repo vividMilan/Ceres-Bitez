@@ -3,7 +3,7 @@ import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
     doc,
     getDoc,
@@ -20,6 +20,8 @@ export default function studentRequest() {
     const [loading, setLoading] = useState(false);
     const { requestId } = useLocalSearchParams()
 
+    const router = useRouter()
+        
     useEffect(() => {
         try {
             const docRef = doc(db, "requests", requestId)
@@ -76,6 +78,7 @@ export default function studentRequest() {
             }
 
             Alert.alert("Request Accepted Succefully !!!!");
+            router.replace("/restuarant/(tabs)/order")
         } catch (error) {
             console.error(error);
         } finally {
@@ -142,10 +145,10 @@ export default function studentRequest() {
             </View>
 
             <View style={globalStyles.spaceBetween}>
-                <Text style={{fontFamily: fonts.semiBold}}>Location (20 mins)</Text>
+                <Text style={{fontFamily: fonts.semiBold}}>Location : </Text>
                 <View>
                     <Text style={{fontFamily: fonts.semiBold}}>
-                        Nawala
+                        {requests.city}
                     </Text>
                 </View>
             </View>

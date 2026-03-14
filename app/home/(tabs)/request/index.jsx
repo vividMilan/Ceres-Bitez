@@ -8,9 +8,10 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
-import { collection, doc, GeoPoint, serverTimestamp, setDoc } from "firebase/firestore";
+import { collection, doc, GeoPoint, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export default function index() {
@@ -24,8 +25,11 @@ export default function index() {
     const [currentLocation, setCurrentLocation] = useState(null)
     const [address, setAddress] = useState("")
     const [city, setCity] = useState("")
+    const [home, setHome] = useState(null)
 
     const today = new Date()
+
+    const homeId =  "mGwGicHqcwbBFh9tV63k"
 
     const urlBuilder = (latitude, longitude) => {
         return (`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`)
@@ -90,11 +94,14 @@ export default function index() {
             status: "pending",
             createdAt: serverTimestamp(),
             home : {
-                homeID: "uwgh6m1Q510uvx15Vxm8",
+                homeId: homeId,
                 location: new GeoPoint(
                     item.currentLocation.latitude,
                     item.currentLocation.longitude
-                )
+                ),
+                city: city,
+                address: address,
+                name: home.name
             },
             description: item.description || ""
         })
@@ -146,6 +153,21 @@ export default function index() {
     useEffect(() => {
         getCurrentLocation()
     }, [])
+
+    useEffect(() => {
+        const fetchHomeDetails = async () => {
+            try {
+                const homeSnap = await getDoc(doc(db, "home", homeId))
+
+                setHome(homeSnap.data())
+
+            } catch (error) {
+                console.log(error.message)
+            }
+        } 
+
+        fetchHomeDetails()
+    }, [homeId])
 
 
     return (

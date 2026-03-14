@@ -1,3 +1,4 @@
+import Chip from "@/components/Chip";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
@@ -6,6 +7,7 @@ import { useRouter } from "expo-router";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { View } from "react-native-reanimated/lib/typescript/Animated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const progressStatus = [
@@ -19,6 +21,10 @@ export default function Index() {
     const router = useRouter()
 
     const [requests, setRequests] = useState([])
+    const [selected, setSelected] = useState("ngo")
+
+    const filteredRequests = requests
+        .filter(r => r.type === selected)
 
     useEffect(() => {
         const q = query(
@@ -111,12 +117,30 @@ export default function Index() {
             <Text style={globalStyles.titleText}>
                 Ongoing Requests
             </Text>
-
-            <FlatList 
-                data={requests}
-                keyExtractor={(item) => item.requestId}
-                renderItem={renderRequest}
+            <Chip 
+                options={["NGO", "Student"]}
+                selected={selected === "ngo" ? "NGO" : "Student"}
+                onPress={(value) => setSelected(value.toLowerCase())}
             />
+
+            {
+                filteredRequests.length === 0 ? (
+
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>
+                            No Ongoing {selected} Requests
+                        </Text>
+                    </View>
+
+                ) : (
+                    <FlatList 
+                        data={filteredRequests}
+                        keyExtractor={(item) => item.requestId}
+                        renderItem={renderRequest}
+                    />
+                )
+            }
+
         </SafeAreaView>
     )
 }
@@ -129,5 +153,18 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 10,
         marginBottom: 10,
+    },
+    emptyContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 40,
+        gap: 10,
+    },
+
+    emptyText: {
+        fontSize: 18,
+        color: "gray",
+        fontFamily: fonts.regular,
     },
 })

@@ -27,9 +27,11 @@ export default function index() {
 
     const router = useRouter()
 
-    const filteredRequests = requests?.filter((item) =>
-        item.home?.name?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filteredRequests = requests.filter((item) => 
+        (item.home?.name || "")
+            .toLowerCase()
+            .includes(search.toLowerCase())
+    )
 
     // fetch all requests
     useEffect(() => {
@@ -108,11 +110,26 @@ export default function index() {
                 />
             </View>
             <Text style={globalStyles.titleText}>Accepted Queue</Text>
-            <FlatList 
-                data={filteredRequests}
-                keyExtractor={(item) => item.id}
-                renderItem={renderRequest}
-            />
+
+            {
+                filteredRequests.length === 0  ? (
+                    
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>
+                            {search ? "No Homes match your search" : "No Accepted Requests"}
+                        </Text>
+                    </View>
+
+                ) : (
+                    <FlatList 
+                        data={filteredRequests}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderRequest}
+                    />
+                )
+            
+            }
+
         </SafeAreaProvider>
         
     )
@@ -143,4 +160,32 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 5,
     },
+    searchContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        backgroundColor: "#F2F2F2",
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderRadius: 10,
+        marginBottom: 15,
+    },
+
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        fontFamily: fonts.regular,
+    },
+    emptyContainer: {
+        marginTop: 60,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 10,
+    },
+
+    emptyText: {
+        fontSize: 16,
+        color: "#777",
+        fontFamily: fonts.regular,
+    }
 });

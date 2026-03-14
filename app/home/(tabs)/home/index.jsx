@@ -2,16 +2,17 @@ import Chip from "@/components/Chip";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { db } from "@/firebaseConfig";
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const router = useRouter()
 
-const requestStatus = ["Ongoing", "Assigned", "Pending"];
+const requestStatus = ["Ongoing", "Pending"];
 
 const homeDetails = {
     name: "Suhhinda Elders Home",
@@ -32,6 +33,7 @@ const ongoingStatuses = [
 ];
 
 export default function index() {
+    const router = useRouter()
     const [selected, setSelected] = useState("Ongoing");
     const [requests, setRequests] = useState([]);
 
@@ -40,36 +42,67 @@ export default function index() {
         
         const requestDate = item.date?.toDate ? item.date.toDate() : new Date(item.date);
 
-        return (
-            <TouchableOpacity 
-                style={styles.shopCard}
-                key={item.id}
-                onPress={() => handleRequestClick(item)}
-            >
-                <Image 
-                    source={{ uri: item.image || "https://via.placeholder.com/400x200" }} 
-                    style={{ width: "100%", height: 200, borderRadius: 5 }} 
-                />
+        const isPending = item.status === "pending"
 
-                <View style={styles.title}>
-                    <Text style={styles.shopName}>{item.ngo || "Unknown NGO"}</Text>
-                </View>
+        if (isPending) {
 
-                <View style={styles.ratingRow}>
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                        <MaterialIcons name="group" size={16} color="black" />
-                        <Text style={{ color: "black", fontFamily: fonts.semiBold }}>{item.qty || 0}</Text>
+            return (
+                <TouchableOpacity
+                    style={styles.shopCard}
+                >
+                    <View style={styles.ratingRow}>
+                        <AntDesign name="hourglass" size={16} color="black" />
+                        <Text>Pending Request</Text>
+                    </View>
+                    <View style={styles.ratingRow}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                            <MaterialIcons name="group" size={16} color="black" />
+                            <Text style={{ color: "black", fontFamily: fonts.semiBold }}>{item.qty || 0}</Text>
+                        </View>
+    
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                            <Entypo name="calendar" size={16} color="black" />
+                            <Text style={{ color: "#565556D" }}>
+                                {requestDate.toLocaleDateString()}
+                            </Text>
+                        </View>
                     </View>
 
-                    <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
-                        <Entypo name="calendar" size={16} color="black" />
-                        <Text style={{ color: "#565556D" }}>
-                            {requestDate.toLocaleDateString()}
-                        </Text>
+                </TouchableOpacity>
+            )
+
+        } else {
+            return (
+                <TouchableOpacity 
+                    style={styles.shopCard}
+                    onPress={() => handleRequestClick(item)}
+                >
+                    <Image 
+                        source={{ uri: item.image || "https://via.placeholder.com/400x200" }} 
+                        style={{ width: "100%", height: 200, borderRadius: 5 }} 
+                    />
+    
+                    <View style={styles.title}>
+                        <Text style={styles.shopName}>{item.ngo || "Unknown NGO"}</Text>
                     </View>
-                </View>
-            </TouchableOpacity>
-        );
+    
+                    <View style={styles.ratingRow}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                            <MaterialIcons name="group" size={16} color="black" />
+                            <Text style={{ color: "black", fontFamily: fonts.semiBold }}>{item.qty || 0}</Text>
+                        </View>
+    
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 2 }}>
+                            <Entypo name="calendar" size={16} color="black" />
+                            <Text style={{ color: "#565556D" }}>
+                                {requestDate.toLocaleDateString()}
+                            </Text>
+                        </View>
+                    </View>
+                </TouchableOpacity>
+            );
+        }
+
     };
 
 

@@ -45,12 +45,17 @@ export default function index() {
         }, [])
 
         const filteredRequests = requests
-            .filter(r => selected === "All" || r.type === selected.toLowerCase())
+            .filter(r => r.type === selected.toLocaleLowerCase())
             .filter(r => {
-                const nameToSearch = r.student?.studentName ?
-                    r.ngoName : "";
-                return nameToSearch.toLowerCase().includes(searchText.toLowerCase());
-            });
+                const nameToSearch = 
+                    r.type === "student"
+                        ? r.student?.name || ""
+                        : r.NGO?.name || ""
+
+                return nameToSearch
+                    .toLowerCase()
+                    .includes(searchText.toLowerCase())
+            })
 
         const renderRequests = ({ item }) => {
 
@@ -139,19 +144,32 @@ export default function index() {
                     />
                 </View>
                 <View>
-                    <FlatList
-                        data={requests}
-                        renderItem={renderRequests}
-                        keyExtractor={(item) => item.requestId}
-                    >
-                    </FlatList>
+
+                    {
+                        filteredRequests.length === 0 ? (
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>
+                                    No {selected} Requests Yet
+                                </Text>
+                            </View>
+                        ) : (
+
+                            <FlatList
+                                data={filteredRequests}
+                                renderItem={renderRequests}
+                                keyExtractor={(item) => item.requestId}
+                            />
+                        )
+                
+                    }
+
                 </View>
             </SafeAreaView>
         )
 }
     
 const styles = StyleSheet.create({
-        requestCard: {
+    requestCard: {
             display: "flex",
             gap: 2,
             backgroundColor: Colors.default.greyBackground,
@@ -159,5 +177,18 @@ const styles = StyleSheet.create({
             borderRadius: 10,
             marginBottom: 10,
         },
+    emptyContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 40,
+        gap: 10,
+    },
+
+    emptyText: {
+        fontSize: 18,
+        color: "gray",
+        fontFamily: fonts.regular,
+    },
 });
     

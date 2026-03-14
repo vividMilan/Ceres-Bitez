@@ -7,11 +7,10 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
     FlatList,
-    Image,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -51,18 +50,12 @@ export default function index() {
                             requestId: item.id,
                             homeId: item.home?.homeID,
                             homeName: item.home?.name,
-                            homeImage: item.home?.image,
-                            homeLocation: item.homeData?.location,
+                            homeLocation: item.home?.location,
                             requestDate: item.date,
                         },
                     })
                 }
             >
-                <Image
-                    source={{ uri: item.home?.image }}
-                    style={{ width: "100%", height: 200, borderRadius: 5 }}
-                />
-
                 <View style={styles.title}>
                     <Text style={styles.shopName}>{item.home?.name}</Text>
                 </View>
@@ -81,7 +74,7 @@ export default function index() {
                                 fontFamily: fonts.semiBold,
                             }}
                         >
-                            {item.homeData?.location}
+                            {item.home?.city}
                         </Text>
                     </View>
                     <View

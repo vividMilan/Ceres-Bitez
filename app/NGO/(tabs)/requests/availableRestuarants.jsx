@@ -40,7 +40,7 @@ export default function availableRestuarants() {
 
                     if (food.quantity < requiredQty) return
                     if (isVeg && food.vegNonVeg != "Veg") return
-                    if (food.notSuitableAt.toDate() > new Date()) return
+                    if (food.notSuitableAt.toDate() < new Date()) return
 
 
                     // Track suitable foods per restuarant

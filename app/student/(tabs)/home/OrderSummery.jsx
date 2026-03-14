@@ -189,6 +189,8 @@ export default function OrderSummery() {
                             shopName,
                             location: JSON.stringify(location),
                             request: JSON.stringify(parsedSelectedItems),
+                            city: city,
+                            address: address
                         },
                     })
                 }

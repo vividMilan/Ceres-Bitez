@@ -9,6 +9,7 @@ import {
     addDoc,
     collection,
     doc,
+    GeoPoint,
     getDoc,
     serverTimestamp,
 } from "firebase/firestore";
@@ -30,7 +31,7 @@ const paymentMethods = [
 ];
 
 export default function CheckOut() {
-    const { shopId, shopName, location, request } = useLocalSearchParams();
+    const { shopId, shopName, location, request, city, address } = useLocalSearchParams();
 
     const parsedRequest = JSON.parse(request) || [];
     const parsedLocation = JSON.parse(location) || [];
@@ -54,6 +55,8 @@ export default function CheckOut() {
             const studentRef = doc(db, "users", studentId)
             const studentSnap = await getDoc(studentRef)
 
+            const parsedLocation = JSON.parse(location)
+
             const totalPrice = parsedRequest.reduce((sum, item) => {
                 return sum + item.price * item.qty;
             }, 0);
@@ -61,7 +64,11 @@ export default function CheckOut() {
             const requestData = {
                 student: {
                     studentId: studentSnap.id,
-                    ...studentSnap.data()
+                    ...studentSnap.data(),
+                    location: new GeoPoint(
+                        parsedLocation.latitude,
+                        parsedLocation.longitude
+                    )
                 },
                 restuarant: {
                     restuarantId: restaurantSnap.id,
@@ -73,6 +80,8 @@ export default function CheckOut() {
                 type: "student",
                 totalPrice: totalPrice,
                 createdAt: serverTimestamp(),
+                city: city,
+                address: address
             };
 
             await addDoc(collection(db, "requests"), requestData);

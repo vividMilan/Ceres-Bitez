@@ -2,7 +2,7 @@ import { globalStyles } from "@/constants/globalStyle";
 import { db } from "@/firebaseConfig";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function pendingRequest() {
@@ -46,10 +46,10 @@ export default function pendingRequest() {
             <View style={{ flex: 1 }}>
                 {/* Top Section */}
                 <View>
-                    <Image
+                    {/* <Image
                         source={{ uri: homeImage }}
                         style={{ width: "100%", height: 200 }}
-                    />
+                    /> */}
                     <Text
                         style={[
                             globalStyles.titleText,
@@ -68,7 +68,6 @@ export default function pendingRequest() {
                 >
                     <View>
                         <Text>
-                            Date:{" "}
                             {requestDate
                                 ? new Date(requestDate).toLocaleDateString()
                                 : "No Date"}
