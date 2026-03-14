@@ -5,6 +5,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { validateUserRole } from "../authController/authMethods";
 
 import { useState } from "react";
 
@@ -59,10 +60,14 @@ export default function login() {
 
         try {
             setLoading(true);
-            await firebaseLogin(email, password);
-            router.push("/(auth)/authController/testLogin");
+
+            const userCredential = await firebaseLogin(email, password);
+            // Validate that this user is actually a student
+            await validateUserRole(userCredential.uid, "student");
+            router.push("/student");
         } catch (error) {
-            setError({ password: "Invalid email or password." });
+            setError({ password: error.message || "Access denied. You are not registered as a student." });
+
         } finally {
             setLoading(false);
         }
@@ -79,7 +84,7 @@ export default function login() {
 
     return (
         <SafeAreaView style={globalStyles.container}>
-            <Text style={globalStyles.titleText}>Login as Restaurant</Text>
+            <Text style={globalStyles.titleText}>Login as Student</Text>
 
             <View>
                 <TextInput
@@ -99,7 +104,7 @@ export default function login() {
                         placeholder="Password"
                         secureTextEntry={secureMode_password}
                         value={password}
-                        maxLength={12} 
+                        maxLength={12}
                         onChangeText={(value) => handleChange("password", value)}
                     />
                     <TouchableOpacity

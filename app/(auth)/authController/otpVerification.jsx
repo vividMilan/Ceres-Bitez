@@ -104,7 +104,7 @@ const OtpVerification = () => {
         // }
 
         console.log(userRole + " signed up successfully with email: " + pendingEmail);
-        router.push(`/ (auth)/${userRole}/testLogin`);
+        router.push(`/(auth)/(${userRole})/login`);
 
       } catch (error) {
         console.error("Signup failed during OTP verification:", error);

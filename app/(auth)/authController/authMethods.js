@@ -4,8 +4,35 @@ import {
   fetchSignInMethodsForEmail,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebaseConfig";
+
+import { useEffect, useState } from "react";
+
+
+
+// Add this new function to authMethods.js
+const validateUserRole = async (uid, expectedRole) => {
+  try {
+    const userDocRef = doc(db, expectedRole, uid);
+    const userDoc = await getDoc(userDocRef);
+    
+    if (!userDoc.exists()) {
+      throw new Error(`User not found as ${expectedRole}`);
+    }
+    
+    const userData = userDoc.data();
+    return {
+      uid: uid,
+      role: userData.userRole,
+      email: userData.email,
+      ...userData
+    };
+  } catch (error) {
+    throw new Error(`Role validation failed: ${error.message}`);
+  }
+};
+
 
 const firebaseSignUp = async (email, password, profileData = {}) => {
   const normalizedEmail = email?.trim().toLowerCase();
@@ -52,15 +79,16 @@ const firebaseLogin = async (email, password) => {
     throw new Error("Please fill in all fields.");
   }
   try {
-    await signInWithEmailAndPassword(auth, normalizedEmail, normalizedPassword);
+    const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, normalizedPassword);
     setTimeout(() => {
       console.log("User logged in successfully:", normalizedEmail);
     }, 1000);
+    return userCredential.user;
   } catch (error) {
         console.error("Login failed for email:", normalizedEmail, error);
 
     throw new Error("Invalid email or password.");
-  } 
+  }
 }; 
 
 
@@ -74,5 +102,42 @@ const firebaseLogout = async () => {
   }
 };
 
-export { firebaseLogin, firebaseLogout, firebaseSignUp };
+const getUserData = () => {
+    const [userData, setUserData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+        const fetchUserData = async () => { 
+            try {
+                const currentUser = auth.currentUser;
+                if (!currentUser) {
+                    setLoading(false);
+                    return;
+                }
+                const home = await getDoc(doc(db, "home", currentUser.uid));
+                const ngo = await getDoc(doc(db, "ngo", currentUser.uid));
+                const restaurants = await getDoc(doc(db, "restaurants", currentUser.uid));
+                const volunteers = await getDoc(doc(db, "volunteers", currentUser.uid));
+                const students = await getDoc(doc(db, "student", currentUser.uid));
+                let snp = null;
+
+                if (home.exists()) snp = home;
+                else if (ngo.exists()) snp = ngo;
+                else if (restaurants.exists()) snp = restaurants;
+                else if (volunteers.exists()) snp = volunteers;
+                else if (students.exists()) snp = students;
+                if (snp && snp.exists()) {
+                    setUserData({ uid: currentUser.uid, ...snp.data() });
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setLoading(false);}
+        };
+        fetchUserData();
+    }, []);
+    return { userData, loading };
+}
+
+
+export { firebaseLogin, firebaseLogout, firebaseSignUp, getUserData, validateUserRole };
 

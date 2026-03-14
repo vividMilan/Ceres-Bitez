@@ -3,12 +3,11 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useState } from "react";
-
-import { firebaseLogin } from "../authController/authMethods";
+import { firebaseLogin, validateUserRole } from "../authController/authMethods";
 
 export default function login() {
     const router = useRouter();
@@ -59,10 +58,11 @@ export default function login() {
 
         try {
             setLoading(true);
-            await firebaseLogin(email, password);
-            router.push("/(auth)/authController/testLogin");
+            const userCredential = await firebaseLogin(email, password);
+            await validateUserRole(userCredential.uid, "volunteer");
+            router.push("/volunteer");
         } catch (error) {
-            setError({ password: "Invalid email or password." });
+            setError({ password: error.message || "Access denied. You are not registered as a volunteer." });
         } finally {
             setLoading(false);
         }
@@ -79,7 +79,7 @@ export default function login() {
 
     return (
         <SafeAreaView style={globalStyles.container}>
-            <Text style={globalStyles.titleText}>Login as Restaurant</Text>
+            <Text style={globalStyles.titleText}>Login as Volunteer</Text>
 
             <View>
                 <TextInput

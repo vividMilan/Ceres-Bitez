@@ -6,9 +6,9 @@
 
 import { globalStyles } from "@/constants/globalStyle";
 import { auth, db } from "@/firebaseConfig";
+import { useRouter } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import {useRouter} from "expo-router";
 
 import {
     ActivityIndicator,
@@ -49,6 +49,7 @@ export default function TestLogin() {
                     setError("No user is currently signed in.");
                     return;
                 }
+                
 
                 // Home users are stored in the "home" collection under their uid
                 const home = await getDoc(doc(db, "home", currentUser.uid));

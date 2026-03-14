@@ -11,6 +11,7 @@ import { Checkbox } from "expo-checkbox";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 
+import { supabase } from "@/supabaseConfig";
 
 import { useRouter } from "expo-router";
 import {
@@ -63,7 +64,7 @@ export default function signUp() {
         mobile: mobile,
         ngo: ngo,
         licence_img_url: "none",
-        userRole: "volunteers"
+        userRole: "volunteer"
     }
 
     /**
@@ -131,11 +132,23 @@ export default function signUp() {
         // Sign in logic
         try {
             setLoading(true);
+            setImageUploading(true);
+
+
+            const tempUID = Math.random().toString(36).substring(2, 15);
+            const licenceImageUrl = await uploadRecordBook(imageUri, `volunteer_licences/${tempUID}`);
 
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            
             // send otp to user email
             await sendOTP(email, otp);
             console.log("Generated OTP from params:", otp);
+
+
+            const updatedVolunteerData = {
+                ...volunteerData,
+                licence_img_url: licenceImageUrl,
+            };
 
 
             await AsyncStorage.setItem(
@@ -143,7 +156,8 @@ export default function signUp() {
                 JSON.stringify({
                     email,
                     password,
-                    userData: volunteerData,
+                    userData: updatedVolunteerData,
+                    tempUID
                 }),
             );
 
@@ -225,6 +239,32 @@ export default function signUp() {
             alert("Error selecting image: " + error.message);
         }
     };
+
+    
+        const uploadRecordBook = async (uri, uid) => {
+            const response = await fetch(uri);
+            const arrayBuffer = await response.arrayBuffer();
+            const filePath = `${uid}/recordBook.jpg`;
+    
+            const { error } = await supabase.storage
+                .from("student-record-books")
+                .upload(filePath, arrayBuffer, {
+                    contentType: "image/jpeg",
+                    upsert: true,
+                });
+    
+            if (error) {
+                console.log("UPLOAD ERROR:", error);
+                throw error;
+            }
+    
+            const { data } = supabase.storage
+                .from("student-record-books")
+                .getPublicUrl(filePath);
+    
+            return data.publicUrl;
+        };
+    
 
 
 
