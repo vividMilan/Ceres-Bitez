@@ -5,33 +5,50 @@ import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import { useLocalSearchParams } from "expo-router";
 import {
-    collection,
     doc,
     getDoc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
+    onSnapshot,
+    updateDoc
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function request() {
+export default function studentRequest() {
     const student_pic = require("../../../../assets/images/student_pic.png");
-    const { studentName, foods, totalPrice, requestId } =
-        useLocalSearchParams();
-
-    const parsedFoods = JSON.parse(foods);
+    const [requests, setRequest] = useState(null)
     const [loading, setLoading] = useState(false);
+    const { requestId } = useLocalSearchParams()
 
-    // const reduceQty = async (parsedFoods) => {
-    //     try {
-    //         parsedFoods
-    //     } catch (error) {
-    //         throw error
-    //     }
-    // }
+    useEffect(() => {
+        try {
+            const docRef = doc(db, "requests", requestId)
+
+
+            const unsubscribe = onSnapshot(docRef, (snapshot) => {
+
+                if (!snapshot.exists()) return;
+
+                const data = {
+                    requestId: snapshot.id,
+                    ...snapshot.data()
+                }
+
+                setRequest(data)
+
+                console.log(data)
+
+            })
+
+            return() => unsubscribe()
+
+        } catch (error) {
+            console.log(error.message)
+        }
+    }, [requestId])
+
+    const parsedFoods = requests?.foodItems || []
+    const totalPrice = requests?.totalPrice || 0
 
     const handleRequest = async () => {
         try {
@@ -39,7 +56,6 @@ export default function request() {
 
             for (const food of parsedFoods) {
                 const foodRef = doc(db, "foods", food.id);
-
                 const foodSnap = await getDoc(foodRef);
 
                 if (foodSnap.exists()) {
@@ -53,7 +69,7 @@ export default function request() {
             }
 
             if (requestId) {
-                const requestRef = doc(db, "studentRequests", requestId);
+                const requestRef = doc(db, "requests", requestId);
                 await updateDoc(requestRef, {
                     status: "r-accepted",
                 });
@@ -67,20 +83,7 @@ export default function request() {
         }
     };
 
-    useEffect(() => {
-        const summa = async () => {
-            const request = await getDocs(
-                query(
-                    collection(db, "studentRequests"),
-                    where("__name__", "==", requestId),
-                ),
-            );
-
-            console.log(request.docs.map((doc) => doc.data().__name__));
-        };
-
-        summa();
-    }, []);
+    if (!requests) return null
 
     return (
         <SafeAreaView style={globalStyles.container}>
@@ -92,7 +95,7 @@ export default function request() {
                     style={{ width: 60, height: 60, borderRadius: 50 }}
                 />
                 <Text style={[{ fontSize: 20, fontFamily: fonts.semiBold }]}>
-                    {studentName}
+                    {requests.student?.name || "Unknown Student"}
                 </Text>
             </View>
             <Text style={{ fontSize: 20, fontFamily: fonts.semiBold }}>
@@ -138,14 +141,14 @@ export default function request() {
                 </View>
             </View>
 
-            {/* <View style={globalStyles.spaceBetween}>
+            <View style={globalStyles.spaceBetween}>
                 <Text style={{fontFamily: fonts.semiBold}}>Location (20 mins)</Text>
                 <View>
                     <Text style={{fontFamily: fonts.semiBold}}>
                         Nawala
                     </Text>
                 </View>
-            </View> */}
+            </View>
 
             <TouchableOpacity
                 onPress={handleRequest}
@@ -158,3 +161,14 @@ export default function request() {
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    requestCard: {
+        display: "flex",
+        gap: 2,
+        backgroundColor: Colors.default.greyBackground,
+        padding: 16,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+});

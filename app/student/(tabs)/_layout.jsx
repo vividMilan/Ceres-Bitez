@@ -31,7 +31,7 @@ export default function StudentTabLayout() {
             <Tabs.Screen 
                 name="order"
                 options={{
-                    title: "Order",
+                    title: "Requests",
                     tabBarIcon: ({color, size}) => (
                         <MaterialCommunityIcons name="invoice-list" size={size} color={color}/>
                     )

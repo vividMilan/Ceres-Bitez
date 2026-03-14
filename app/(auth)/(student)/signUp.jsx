@@ -261,6 +261,17 @@ export default function signUp() {
         return await response.blob();
     };
 
+    const clearAllFields = () => {
+        setName("")
+        setEmail("")
+        setMobile("")
+        setRegNo("")
+        setPassword("")
+        setConfirmPassword("")
+        setUniversity("")
+        setImageUri(null)
+    }
+
     const uploadRecordBook = async (uri, uid) => {
         const response = await fetch(uri);
         const arrayBuffer = await response.arrayBuffer();
@@ -269,7 +280,7 @@ export default function signUp() {
         const { error } = await supabase.storage
             .from("student-record-books")
             .upload(filePath, arrayBuffer, {
-                contentType: "image/jpeg",
+                contentType: "image/*",
                 upsert: true,
             });
 

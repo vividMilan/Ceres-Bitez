@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-    export default function index() {
+export default function index() {
 
         const router = useRouter()
         const [loading, setLoading] = useState(false)
@@ -21,7 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
         useEffect(() => {
             const q = query(
                 collection(db, "requests"),
-                where("status", "==", "n-requested")
+                where("status", "in", ["n-requested", "pending"])
             )
 
             const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -35,6 +35,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
                 })
 
                 setRequests(data)
+
+                console.log("aerawerlwekjlk: ", data)
             }, (error) => {
                 console.log(error.message)
             })
@@ -52,7 +54,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
         const renderRequests = ({ item }) => {
 
-            const isStudent = item.status === "student"
+            const isStudent = item.type === "student"
 
             if (isStudent) {
                 return (
@@ -60,18 +62,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
                         style={styles.requestCard} 
                         onPress={() => 
                             router.push({
-                                pathname: "/restuarant/home/request",
+                                pathname: "/restuarant/home/studentRequest",
                                 params: { 
-                                    requestId: item.id,
-                                    foods: JSON.stringify(item.foodItems),
-                                    studentName: item.student?.studentName,
-                                    totalPrice: item.totalPrice
+                                    requestId: item.requestId
                                 }
                             })
                         }
                     >
                         <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>
-                            {item.student?.studentName || "Unknown Student"}
+                            {item.student?.name || "Unknown Student"}
                         </Text>
     
                         {item.foodItems?.map((food, index) => (
@@ -149,15 +148,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
                 </View>
             </SafeAreaView>
         )
-    }
-
+}
+    
 const styles = StyleSheet.create({
-    requestCard: {
-        display: "flex",
-        gap: 2,
-        backgroundColor: Colors.default.greyBackground,
-        padding: 16,
-        borderRadius: 10,
-        marginBottom: 10,
-    },
+        requestCard: {
+            display: "flex",
+            gap: 2,
+            backgroundColor: Colors.default.greyBackground,
+            padding: 16,
+            borderRadius: 10,
+            marginBottom: 10,
+        },
 });
+    

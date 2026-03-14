@@ -136,7 +136,9 @@ export default function index() {
         }
 
         if (request.type === "student") {
-
+            if (request.status === "packed") {
+                newStatus = "v-accepted"
+            }
         }
 
         if (!newStatus) return;
@@ -213,7 +215,14 @@ export default function index() {
             }
 
             if (request.type === "student") {
-                
+
+                if (request.status === "v-accepted") {
+                    navigateToRestaurant(request)
+                }
+
+                if (request.status === "picked") {
+                    
+                }
             }
 
         }) 
@@ -262,6 +271,10 @@ export default function index() {
 
     const navigateToHome = (request) => {
         getRoute(request.NGO.location, request.home.location)
+    }
+
+    const navigateToStudent = (request) => {
+        getRoute(request.restuarant.location, request.student.location)
     }
 
     const filterNearbyRequests = async (requests) => {
