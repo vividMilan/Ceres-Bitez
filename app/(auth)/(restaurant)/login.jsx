@@ -64,7 +64,7 @@ export default function login() {
             
             const userCredential = await firebaseLogin(email, password);
             await validateUserRole(userCredential.uid, "restaurant");
-            router.push("/restaurant");
+            router.push("/restaurant(tabs)");
         } catch (error) {
             setError({ password: error.message || "Access denied. You are not registered as a restaurant." });
         } finally {

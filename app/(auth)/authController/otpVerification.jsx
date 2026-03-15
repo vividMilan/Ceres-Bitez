@@ -88,21 +88,6 @@ const OtpVerification = () => {
         Alert.alert("Success", "Account created successfully!");
         const userRole = userData.userRole || "user"; // Get role from signup data
 
-        // if (userRole === "restaurant") {
-        //   router.push("#");
-        // }else if (userRole === "ngo") {
-        //   router.push("#");
-        // }else if (userRole === "volunteer") {
-        //   router.push("#");
-        // }else if (userRole === "student") {
-        //   router.push("#");
-        // }else if (userRole === "admin") {
-        //   router.push("#");
-        // }else {
-        //   console.warn("Unknown user role: " + userRole);
-        //   router.push("/(auth)/authController/testLogin");
-        // }
-
         console.log(userRole + " signed up successfully with email: " + pendingEmail);
         router.push(`/(auth)/(${userRole})/login`);
 

@@ -54,13 +54,20 @@ const firebaseSignUp = async (email, password, profileData = {}) => {
   );
 
   try {
-    await setDoc(doc(db, profileData.userRole, userCredential.user.uid), {
+    const firestoreData = {
       uid: userCredential.user.uid,
       email: userCredential.user.email,
       ...profileData,
       createdAt: serverTimestamp(),
-    });
+    };
+
+    console.log("Saving to Firestore with data:", firestoreData);
+
+    await setDoc(doc(db, profileData.userRole, userCredential.user.uid), firestoreData);
+
+    console.log("User data saved to Firestore successfully");
   } catch (error) {
+    console.error("Error saving user data to Firestore:", error);
     await deleteUser(userCredential.user).catch((deleteError) => {
       console.error("Failed to rollback auth user:", deleteError);
     });

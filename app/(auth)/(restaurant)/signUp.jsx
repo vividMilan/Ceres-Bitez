@@ -1,10 +1,15 @@
-import { fonts } from "@/constants/fonts";
+import { fonts, fontSizes } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
+import { supabase } from "@/supabaseConfig";
+import Entypo from "@expo/vector-icons/Entypo";
 import Checkbox from "expo-checkbox";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+
 
 import { sendOTP } from "../authController/sendOTP";
 
@@ -14,8 +19,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     ActivityIndicator,
     Alert,
+    Image,
     KeyboardAvoidingView,
+    Modal,
     Platform,
+    Pressable,
     ScrollView,
     StyleSheet,
     Text,
@@ -31,7 +39,7 @@ const PENDING_SIGNUP_KEY = "pendingSignUp";
 
 
 export default function signUp() {
-   const router = useRouter();
+    const router = useRouter();
 
     const [restaurantName, setRestaurantName] = useState("");
     const [email, setEmail] = useState("");
@@ -39,6 +47,7 @@ export default function signUp() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isChecked, setChecked] = useState(false);
+    const [imageUri, setImageUri] = useState(null);
 
     // Other states
     const [loading, setLoading] = useState(false);
@@ -46,16 +55,18 @@ export default function signUp() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [secureMode_password, setSecureMode_password] = useState(true);
     const [secureMode_conPassword, setSecureMode_conPassword] = useState(true)
+    const [imageUploading, setImageUploading] = useState(false);
+    const [showSourcePicker, setShowSourcePicker] = useState(false);
 
-    
+
     const restaurantProfileData = {
         restaurantName: restaurantName,
         mobileNumber: mobileNumber,
         email: email,
-        userRole: "restaurants",
+        userRole: "restaurant",
     };
 
-     const handleChange = (field, value) => {
+    const handleChange = (field, value) => {
 
         // Clearing Error
         clearErrors();
@@ -68,6 +79,7 @@ export default function signUp() {
         else if (field === "password") setPassword(value);
         else if (field === "confirmPassword") setConfirmPassword(value);
         else if (field === "isChecked") setChecked(value);
+        else if (field === "imageUri") setImageUri(value);
     };
 
 
@@ -102,11 +114,22 @@ export default function signUp() {
         // Sign in logic
         try {
             setLoading(true);
+            setImageUploading(true);
+
+            const tempUID = Math.random().toString(36).substring(2, 15);
+            const restaurentImage = await uploadrestaurentImage(imageUri, tempUID);
 
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
+            console.log("Restaurant Image ", restaurentImage)
             // send otp to user email
             await sendOTP(email, otp);
             console.log("Generated OTP from params:", otp);
+
+                 // Update restaurantProfileData with the image URL
+            const updatedrestaurantProfileData = {
+                ...restaurantProfileData,
+                image: restaurentImage,
+            };
 
 
             await AsyncStorage.setItem(
@@ -114,7 +137,7 @@ export default function signUp() {
                 JSON.stringify({
                     email,
                     password,
-                    userData: restaurantProfileData,
+                    userData: updatedrestaurantProfileData,
                 }),
             );
 
@@ -132,14 +155,99 @@ export default function signUp() {
     };
 
 
-    
+
     const clearErrors = () => {
         if (Object.keys(error).length === 0) return;
         setError({});
     };
 
+    /**
+     * Image Picker Methods
+     * 
+     */
+    // Clear selected image
+    const clearImage = () => {
+        setImageUri(null);
+    };
 
-     
+
+    const askImageSource = () => {
+        setShowSourcePicker(true);
+    };
+
+    // `Choose image source (camera or gallery) and open respective picker
+    const chooseImageSource = (source) => {
+        setShowSourcePicker(false);
+        openImagePicker(source);
+    };
+    // Function to open image picker based on source (camera or gallery)
+    const openImagePicker = async (source) => {
+        try {
+            let permission;
+
+            if (source === 'camera') {
+                permission = await ImagePicker.requestCameraPermissionsAsync();
+                if (!permission.granted) {
+                    alert("Camera permission is required!");
+                    return;
+                }
+            } else {
+                permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                if (!permission.granted) {
+                    alert("Gallery permission is required!");
+                    return;
+                }
+            }
+
+            const result = source === 'camera'
+                ? await ImagePicker.launchCameraAsync({
+                    cameraType: ImagePicker.CameraType.back,
+                    allowsEditing: false,
+                    quality: 0.75,
+                })
+                : await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    allowsEditing: false,
+                    quality: 0.75,
+                });
+
+            if (!result.canceled) {
+                setImageUri(result.assets[0].uri);
+                console.log("Selected image URI:", result.assets[0].uri)
+            }
+        } catch (error) {
+            alert("Error selecting image: " + error.message);
+        }
+    };
+
+
+    const uploadrestaurentImage = async (uri, uid) => {
+        const response = await fetch(uri);
+        const arrayBuffer = await response.arrayBuffer();
+        const filePath = `${uid}/restaurentImage.jpg`;
+
+        const { error } = await supabase.storage
+            .from("student-record-books")
+            .upload(filePath, arrayBuffer, {
+                contentType: "image/*",
+                upsert: true,
+            });
+
+        if (error) {
+            console.log("UPLOAD ERROR:", error);
+            throw error;
+        }
+
+        const { data } = supabase.storage
+            .from("student-record-books")
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    };
+
+
+
+
     return (
         <SafeAreaView style={styles.screen} edges={["top", "bottom"]}>
             <KeyboardAvoidingView
@@ -240,6 +348,82 @@ export default function signUp() {
                         {error.confirmPassword ? <Text style={styles.errorText}>{error.confirmPassword}</Text> : null}
                     </View>
 
+
+
+                    {/* Image Picker */}
+                    <View style={{ marginVertical: 15 }}>
+
+                        {/**Check imageUrl*/}
+
+                        {imageUri ? (
+                            <View>
+                                {/* If image selected, show preview with options to change or remove */}
+                                <Image
+                                    source={{ uri: imageUri, cache: "reload" }}
+                                    style={{
+                                        width: "100%",
+                                        height: 200,
+                                        borderRadius: 8,
+                                        marginBottom: 10,
+                                    }}
+                                    resizeMode="contain"
+                                />
+                                <View style={{ flexDirection: "row", gap: 10 }}>
+                                    <TouchableOpacity
+                                        style={[styles.image_button, { flex: 1 }]}
+                                        onPress={() => openImagePicker("camera")}
+                                        disabled={imageUploading}
+                                    >
+                                        <Text style={styles.image_button_text}>Camera</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.image_button, { flex: 1 }]}
+                                        onPress={() => openImagePicker("gallery")}
+                                        disabled={imageUploading}
+                                    >
+                                        <Text style={styles.image_button_text}>Gallery</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.image_button, { flex: 1, backgroundColor: "red" }]}
+                                        onPress={clearImage}
+                                        disabled={imageUploading}
+                                    >
+                                        <Text style={styles.image_button_text}> Remove</Text>
+                                    </TouchableOpacity>
+                                </View>
+
+                            </View>
+
+
+                        ) : (
+
+
+                            <View style={{ gap: 10 }}>
+                                {/* If no image selected, show placeholder with option to select image */}
+                                <TouchableOpacity
+                                    style={globalStyles.cameraClick}
+                                    onPress={askImageSource}
+                                >
+                                    <Entypo
+                                        name="camera"
+                                        size={72}
+                                        color={Colors.default.inputText}
+                                    />
+                                    <Text
+                                        style={{
+                                            fontSize: fontSizes.regular,
+                                            color: Colors.default.inputText,
+                                        }}
+                                    >
+                                        Upload Restaurant Cover Image
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+
+                        {error.imageUri ? <Text style={styles.errorText}>{error.imageUri}</Text> : null}
+                    </View>
+
                     <View style={styles.termsContainer}>
                         <View style={styles.termsRow}>
                             <Checkbox
@@ -270,7 +454,7 @@ export default function signUp() {
 
                             <View>
                                 <Text
-                                    onPress={() => router.push("/(auth)/(restuarant)/login")}
+                                    onPress={() => router.push("/(auth)/(restaurant)/login")}
                                     style={{
                                         marginHorizontal: "auto",
                                         fontFamily: fonts.regular,
@@ -298,6 +482,75 @@ export default function signUp() {
 
                 </ScrollView>
             </KeyboardAvoidingView>
+            {/* Image Source Picker Modal */}
+            <Modal
+                visible={showSourcePicker}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowSourcePicker(false)}
+            >
+                <Pressable
+                    style={{
+                        flex: 1,
+                        backgroundColor: "rgba(0, 0, 0, 0.45)",
+                        justifyContent: "center",
+                        paddingHorizontal: 20,
+                    }}
+                    onPress={() => setShowSourcePicker(false)}
+                >
+                    <Pressable
+                        style={{
+                            backgroundColor: Colors.white,
+                            borderRadius: 16,
+                            padding: 18,
+                            gap: 10,
+                        }}
+                        onPress={() => { }}
+                    >
+                        <Text
+                            style={{
+
+                                fontFamily: fonts.semiBold,
+                                color: "white",
+                                marginBottom: 10,
+                                fontSize: fontSizes.subTitle
+                            }}
+                        >
+                            Select Image Source
+                        </Text>
+
+                        <TouchableOpacity
+                            style={[
+                                globalStyles.button,
+                                { backgroundColor: Colors.default.primary },
+                            ]}
+                            onPress={() => chooseImageSource("camera")}
+                        >
+                            <Text style={globalStyles.buttonText}>Open Camera</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                globalStyles.button,
+                                { backgroundColor: Colors.default.primary },
+                            ]}
+                            onPress={() => chooseImageSource("gallery")}
+                        >
+                            <Text style={globalStyles.buttonText}>Choose from Gallery</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[
+                                globalStyles.button,
+                                { backgroundColor: "#dc2626" },
+                            ]}
+                            onPress={() => setShowSourcePicker(false)}
+                        >
+                            <Text style={globalStyles.buttonText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </Pressable>
+                </Pressable>
+            </Modal>
 
         </SafeAreaView>
     );
@@ -387,4 +640,16 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginLeft: 46,
     },
+    image_button: {
+        backgroundColor: Colors.default.primary,
+        padding: 7,
+        borderRadius: 8,
+        alignItems: "center",
+        color: Colors.white,
+    },
+    image_button_text: {
+        color: "white",
+        fontSize: 14,
+        fontFamily: fonts.semiBold,
+    }
 });

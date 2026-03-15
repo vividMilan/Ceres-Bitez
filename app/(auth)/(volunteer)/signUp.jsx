@@ -136,7 +136,7 @@ export default function signUp() {
 
 
             const tempUID = Math.random().toString(36).substring(2, 15);
-            const licenceImageUrl = await uploadRecordBook(imageUri, `volunteer_licences/${tempUID}`);
+            const licenceImageUrl = await uploadLicenceImage(imageUri, `volunteer_licences/${tempUID}`);
 
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
             
@@ -241,28 +241,28 @@ export default function signUp() {
     };
 
     
-        const uploadRecordBook = async (uri, uid) => {
-            const response = await fetch(uri);
-            const arrayBuffer = await response.arrayBuffer();
-            const filePath = `${uid}/recordBook.jpg`;
-    
-            const { error } = await supabase.storage
-                .from("student-record-books")
-                .upload(filePath, arrayBuffer, {
-                    contentType: "image/jpeg",
-                    upsert: true,
-                });
-    
-            if (error) {
-                console.log("UPLOAD ERROR:", error);
-                throw error;
-            }
-    
-            const { data } = supabase.storage
-                .from("student-record-books")
-                .getPublicUrl(filePath);
-    
-            return data.publicUrl;
+        const uploadLicenceImage = async (uri, uid) => {
+        const response = await fetch(uri);
+        const arrayBuffer = await response.arrayBuffer();
+        const filePath = `${uid}/licence.jpg`;
+
+        const { error } = await supabase.storage
+            .from("student-record-books")
+            .upload(filePath, arrayBuffer, {
+                contentType: "image/*",
+                upsert: true,
+            });
+
+        if (error) {
+            console.log("UPLOAD ERROR:", error);
+            throw error;
+        }
+
+        const { data } = supabase.storage
+            .from("student-record-books")
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
         };
     
 
