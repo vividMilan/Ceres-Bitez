@@ -13,6 +13,7 @@ const progressStatus = [
     "r-accepted",
     "packed",
     "rv-accepted",
+    "rv-accepted",
 ]
 
 export default function Index() {

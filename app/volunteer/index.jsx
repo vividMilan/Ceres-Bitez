@@ -293,6 +293,10 @@ export default function index() {
         getRoute(currentLocationRef.current, request.student.location)
     }
 
+    const navigateToStudent = (request) => {
+        getRoute(request.restuarant.location, request.student.location)
+    }
+
     const filterNearbyRequests = async (requests) => {
         if (!requests) return
 

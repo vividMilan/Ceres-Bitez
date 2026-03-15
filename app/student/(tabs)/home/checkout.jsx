@@ -1,3 +1,4 @@
+import { getUserData } from "@/app/(auth)/authController/authMethods";
 import PageTitleWithBackButton from "@/components/PageTitleWithBackButton";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
@@ -9,12 +10,11 @@ import {
     addDoc,
     collection,
     doc,
-    GeoPoint,
     getDoc,
-    serverTimestamp,
+    serverTimestamp
 } from "firebase/firestore";
 import { useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const paymentMethods = [
@@ -31,7 +31,9 @@ const paymentMethods = [
 ];
 
 export default function CheckOut() {
-    const { shopId, shopName, location, request, city, address } = useLocalSearchParams();
+    const { shopId, shopName, location, request } = useLocalSearchParams();
+
+    const {userData, loading: userDataLoading} = getUserData()  
 
     const parsedRequest = JSON.parse(request) || [];
     const parsedLocation = JSON.parse(location) || [];
@@ -46,30 +48,17 @@ export default function CheckOut() {
 
     const handleRequestFood = async () => {
         try {
-            const studentId = "czdMs8Z3GTXLTCbyExVKaXsOAa62";
             setLoading(true);
 
             const restaurantRef = doc(db, "restaurants", shopId);
             const restaurantSnap = await getDoc(restaurantRef);
-
-            const studentRef = doc(db, "users", studentId)
-            const studentSnap = await getDoc(studentRef)
-
-            const parsedLocation = JSON.parse(location)
 
             const totalPrice = parsedRequest.reduce((sum, item) => {
                 return sum + item.price * item.qty;
             }, 0);
 
             const requestData = {
-                student: {
-                    studentId: studentSnap.id,
-                    ...studentSnap.data(),
-                    location: new GeoPoint(
-                        parsedLocation.latitude,
-                        parsedLocation.longitude
-                    )
-                },
+                student: userData,
                 restuarant: {
                     restuarantId: restaurantSnap.id,
                     ...restaurantSnap.data()
@@ -94,6 +83,12 @@ export default function CheckOut() {
             setLoading(false);
         }
     };
+
+    if (userDataLoading) {
+        return (
+            <ActivityIndicator size={"large"}/>
+        )
+    }
 
     return (
         <SafeAreaView style={[globalStyles.container]}>
