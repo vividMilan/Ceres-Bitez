@@ -5,8 +5,8 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from "expo-router";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ongoingStatuses = [
     "n-accepted",
@@ -76,16 +76,13 @@ export default function index() {
                         }
                     })}
                 >
-
-                    <Image source={{uri: item.home?.image}} style={{width:"100%", height: 200, borderRadius: 5}}/>
-
                     <View style={styles.title}>
                         <Text style={styles.shopName}>{item.home?.name}</Text>
                     </View>
                     <View style={styles.ratingRow}>
                         <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
                             <Entypo name="location-pin" size={16} color="black" />
-                            <Text style={{color: "black", fontFamily: fonts.semiBold}}>Summa Location</Text>
+                            <Text style={{color: "black", fontFamily: fonts.semiBold}}>{item?.home?.city}</Text>
                         </View>
                         <View style={{flexDirection: "row", alignItems: "center", gap: 2}}>
                             <Entypo name="calendar" size={16} color="black" />
@@ -99,14 +96,13 @@ export default function index() {
     }
 
     return (
-        <SafeAreaProvider style={globalStyles.container}>
-            <View style={styles.searchContainer}>
-                <Entypo name="magnifying-glass" size={18} color="#777" />
+        <SafeAreaView style={globalStyles.container}>
+            <View style={globalStyles.searchBoxRow}>
+                <Entypo name="magnifying-glass" size={30} color="#777" />
                 <TextInput
                     placeholder="Search home..."
                     value={search}
                     onChangeText={setSearch}
-                    style={globalStyles.searchBoxRow}
                 />
             </View>
             <Text style={globalStyles.titleText}>Accepted Queue</Text>
@@ -130,7 +126,7 @@ export default function index() {
             
             }
 
-        </SafeAreaProvider>
+        </SafeAreaView>
         
     )
 }
@@ -160,22 +156,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 5,
     },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        backgroundColor: "#F2F2F2",
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderRadius: 10,
-        marginBottom: 15,
-    },
-
-    searchInput: {
-        flex: 1,
-        fontSize: 16,
-        fontFamily: fonts.regular,
-    },
     emptyContainer: {
         marginTop: 60,
         alignItems: "center",
@@ -187,5 +167,5 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: "#777",
         fontFamily: fonts.regular,
-    }
+    },
 });

@@ -8,6 +8,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from "@react-native-picker/picker";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
 import { collection, doc, GeoPoint, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -34,6 +35,8 @@ export default function index() {
     const urlBuilder = (latitude, longitude) => {
         return (`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`)
     }
+
+    const router = useRouter()
 
     const fetchAddress = async (latitude, longitude) => {
         try {
@@ -64,7 +67,7 @@ export default function index() {
                 return
             }
 
-            const location =    await Location.getCurrentPositionAsync({
+            const location = await Location.getCurrentPositionAsync({
                 accuracy: Location.Accuracy.Highest
             })
 
@@ -140,9 +143,10 @@ export default function index() {
         try {
             await requestFood(request)
             setDate(new Date())
-            setQty("")
+            setQty(0)
             setVegOrNonVeg(null)
             setDescription("")
+            router.navigate("/home/(tabs)/home")
         } catch (error) {
             console.log(error);
         } finally {

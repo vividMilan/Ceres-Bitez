@@ -1,11 +1,33 @@
 import { fonts } from "@/constants/fonts";
 import { Colors } from "@/constants/theme";
-import { useRouter } from "expo-router";
-import React from "react";
+import { db } from "@/firebaseConfig";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { doc, updateDoc } from "firebase/firestore";
+import React, { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function delivered() {
-    const router = useRouter();
+  const router = useRouter();
+  
+  const {requestId} = useLocalSearchParams()
+  const [loading, setLoading] = useState(false)
+  
+  const handleButton = async () => {
+    setLoading(true)
+    try {
+      const requestRef = doc(db, "requests", requestId)
+
+      await updateDoc(requestRef, {
+        status: "h-delivered"
+      })
+      router.replace('/home/(tabs)/home')
+    } catch (error) {
+      console.log(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+    
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centerContent}>
@@ -22,7 +44,7 @@ export default function delivered() {
 
         <TouchableOpacity
           style={styles.okButton}
-          onPress={() => router.navigate('/home/(tabs)/home')}
+          onPress={handleButton}
         >
           <Text style={styles.buttonText}>OK</Text>
         </TouchableOpacity>

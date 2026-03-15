@@ -6,6 +6,7 @@ import { supabase } from "@/supabaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import {
     addDoc,
     collection,
@@ -34,6 +35,8 @@ export default function Index() {
     const [loading, setLoading] = useState(false);
     const [imageUri, setImageUri] = useState(null);
     const [price, setPrice] = useState(null);
+    
+    const router = useRouter()
 
     const openCamera = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -153,6 +156,7 @@ export default function Index() {
             setQuantity(null);
             setVegNonVeg("");
             setImageUri(null);
+            router.navigate("/restuarant/(tabs)/home")
         } catch (error) {
             console.log(error);
         } finally {

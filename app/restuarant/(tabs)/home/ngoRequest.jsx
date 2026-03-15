@@ -7,7 +7,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ngoRequest() {
@@ -43,7 +43,7 @@ export default function ngoRequest() {
 
                     const city = data.results[0].city;
 
-                    const address = `${addressLine}, ${city}`
+                    const address = `${addressLine}, \n${city}`
 
                     setHomeAddress(address);
                 } else {
@@ -90,66 +90,61 @@ export default function ngoRequest() {
     }
 
     return (
-        <SafeAreaView style={globalStyles.container}>
-            <Text style={[globalStyles.titleText]}>
-                {name}
-            </Text>
-            <Text></Text>
-            <View style={[globalStyles.flexDisplay, globalStyles.marginBottom]}>
-                <Entypo name="calendar" size={24} color="black" />
-                <Text>
-                    {formatedDate}
-                </Text>
-            </View>
-            <View style={[globalStyles.flexDisplay, globalStyles.marginBottom]}>
-                <Ionicons name="people-sharp" size={24} color="black" />
-                <Text>
-                    {quantity} Peoples
-                </Text>
-            </View>
-            {/* Selected Food */}
-            <Text style={[globalStyles.regularText, {fontFamily: fonts.semiBold, fontSize: 20}]}>
-                Selected Food
-            </Text>
-            <View style={globalStyles.marginBottom}>
-                <Image source={{uri: parsedSelectedFood.imageUrl}} style={{width: 100, height: 100}} />
-                <View>
-                    <Text>
-                        {parsedSelectedFood.name}
-                    </Text>
-                    <Text>
-                        {parsedSelectedFood.vegNonVeg}
-                    </Text>
-                </View>
-            </View>
+        <SafeAreaView style={[{flex: 1}]}>
+            <View style={{flex: 1, justifyContent: "space-between"}}>
+                <ScrollView contentContainerStyle={{ padding: 20, gap: 20 }}>
+                    <Text style={[globalStyles.titleText]}>{name}</Text>
 
-            {/* Home Details */}
-            <Text style={[globalStyles.regularText, {fontFamily: fonts.semiBold, fontSize: 20}]}>
-                Home Details
-            </Text>
-            <View>
-                <View style={globalStyles.flexDisplay}>
-                    <Entypo name="home" size={24} color="black" />
-                    <Text>
-                        {parsedHomeDetails.name}
+                    <View style={[globalStyles.flexDisplay, globalStyles.marginBottom]}>
+                        <Entypo name="calendar" size={24} color="black" />
+                        <Text>{formatedDate}</Text>
+                    </View>
+
+                    <View style={[globalStyles.flexDisplay, globalStyles.marginBottom]}>
+                        <Ionicons name="people-sharp" size={24} color="black" />
+                        <Text>{quantity} People</Text>
+                    </View>
+
+                    {/* Selected Food */}
+                    <Text style={[globalStyles.regularText, {fontFamily: fonts.semiBold, fontSize: 20}]}>
+                        Selected Food
                     </Text>
-                </View>
-                <View style={globalStyles.flexDisplay}>
-                    <FontAwesome6 name="location-dot" size={24} color="black" />
-                    <Text>
-                        {homeAddress}
+                    <View style={{flexDirection: "row", gap: 12, paddingVertical: 12, borderRadius: 12, overflow: "hidden", elevation: 1, backgroundColor: "#e7e2e2ff"}}>
+                        <Image source={{uri: parsedSelectedFood.imageUrl}} style={{width: 100, height: 100}} />
+                        <View>
+                            <Text style={{ fontFamily: fonts.semiBold }}>{parsedSelectedFood.name}</Text>
+                            <Text style={{ fontFamily: fonts.regular, fontSize: 12, marginTop: 5 }}>
+                                {parsedSelectedFood.vegNonVeg}
+                            </Text>
+                        </View>
+                    </View>
+
+                    {/* Home Details */}
+                    <Text style={[globalStyles.regularText, {fontFamily: fonts.semiBold, fontSize: 20}]}>
+                        Home Details
                     </Text>
+                    <View style={{gap: 10}}>
+                        <View style={globalStyles.flexDisplay}>
+                            <Entypo name="home" size={24} color="black" />
+                            <Text>{parsedHomeDetails.name}</Text>
+                        </View>
+                        <View style={globalStyles.flexDisplay}>
+                            <FontAwesome6 name="location-dot" size={24} color="black" />
+                            <Text>{homeAddress}</Text>
+                        </View>
+                    </View>
+                </ScrollView>
+
+                {/* Button at the bottom */}
+                <View style={{padding: 20}}>
+                    <TouchableOpacity 
+                        style={globalStyles.button}
+                        onPress={handleAccept}
+                    >
+                        <Text style={globalStyles.buttonText}>Accept Request</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-
-            <TouchableOpacity 
-                style={globalStyles.button}
-                onPress={handleAccept}
-            > 
-                <Text style={globalStyles.buttonText}>
-                    Accept Request
-                </Text>
-            </TouchableOpacity>
         </SafeAreaView>
     )
 }

@@ -46,6 +46,8 @@ export default function Index() {
                     );
 
                 setRestuarantData(restuarantData);
+
+                console.log()
             } catch (error) {
                 console.log(error);
             } finally {

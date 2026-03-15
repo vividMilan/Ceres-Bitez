@@ -25,6 +25,7 @@ export default function ShopPage() {
                     query(
                         collection(db, "foods"),
                         where("restuarantId", "==", shopId),
+                        where("notSuitableAt", ">", new Date())
                     ),
                 );
 

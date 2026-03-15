@@ -1,4 +1,5 @@
 import Chip from "@/components/Chip";
+import Spinner from "@/components/Spinner";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
@@ -7,7 +8,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function index() {
@@ -37,25 +38,25 @@ export default function index() {
                 setRequests(data)
 
                 console.log("aerawerlwekjlk: ", data)
+                setLoading(false)
             }, (error) => {
                 console.log(error.message)
-            })
+                setLoading(false)
+            }
+        )
 
             return () => unsubscribe()
         }, [])
 
         const filteredRequests = requests
-            .filter(r => r.type === selected.toLocaleLowerCase())
+            .filter(r => (selected === "NGO" ? r.NGO : r.type === "student"))
             .filter(r => {
                 const nameToSearch = 
                     r.type === "student"
                         ? r.student?.name || ""
                         : r.NGO?.name || ""
-
-                return nameToSearch
-                    .toLowerCase()
-                    .includes(searchText.toLowerCase())
-            })
+                return nameToSearch.toLowerCase().includes(searchText.toLowerCase())
+        });
 
         const renderRequests = ({ item }) => {
 
@@ -111,16 +112,28 @@ export default function index() {
 
                         style={styles.requestCard}
                     >
-                        <Image source={{uri: item.NGO?.imageUrl}} style={{width: "auto", height: 200}}/>
-                        <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
-                            {item.NGO?.name || "Unkown NGO"}
-                        </Text>
+                        <View style={{display: "flex", flexDirection: "row"}}>
+                            <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
+                                {item.home?.name || "Unkown NGO"}
+                            </Text>
+                        </View>
+                        <View style={{display: "flex", flexDirection: "row"}}>
+                            <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
+                                {item.home?.name || "Unkown NGO"}
+                            </Text>
+                        </View>
                     </TouchableOpacity>
                 )
 
             }
             
         };
+
+        if (loading) {
+            return (
+                <Spinner text="Loading Requests" />
+            )
+        }
         
         return (
             <SafeAreaView style={globalStyles.container}>
@@ -158,6 +171,13 @@ export default function index() {
                                 data={filteredRequests}
                                 renderItem={renderRequests}
                                 keyExtractor={(item) => item.requestId}
+                                ListEmptyComponent={
+                                    <View style={styles.emptyContainer}>
+                                        <Text style={styles.emptyText}>
+                                            No {selected} Requests Yet
+                                        </Text>
+                                    </View>
+                                }   
                             />
                         )
                 

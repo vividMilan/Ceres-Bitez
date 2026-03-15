@@ -1,9 +1,12 @@
+import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
+import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Location from "expo-location";
-import { useRouter } from "expo-router";
 import { collection, doc, getDoc, onSnapshot, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -16,6 +19,7 @@ export default function index() {
     const mapRef = useRef(null);
     const [currentRegion, setCurrentRegion] = useState(null);
     const [currentLocation, setCurrentLocation] = useState(null);
+    const currentLocationRef = useRef(null)
 
     const fakeGPS = useRef(null);
     const [routeCoords, setRouteCoords] = useState([]);
@@ -30,9 +34,21 @@ export default function index() {
 
     const acceptTimeout = useRef(null);
 
-    const router = useRouter()
-
     const volunteerId = "V9iAalOh7ufEfJ4XCiVp";
+
+    const updateLocation = (coords) => {
+        setCurrentLocation(coords)
+        currentLocationRef.current = coords
+    }
+
+    const formatLocation = (geoPoint) => {
+        if (!geoPoint) return null;
+
+        return {
+            latitude: geoPoint.latitude,
+            longitude: geoPoint.longitude
+        }
+    }
 
     useEffect(() => {
         const getCurrentLocation = async () => {
@@ -59,7 +75,7 @@ export default function index() {
                 }
 
                 setCurrentRegion(region)
-                setCurrentLocation({latitude, longitude})
+                updateLocation({latitude, longitude})
 
                 const volunteerRef = doc(db, "volunteers", volunteerId)
 
@@ -255,26 +271,26 @@ export default function index() {
             setRouteCoords(route);
 
         } catch (error) {
-
+            console.log(error.message)
         }
     }
 
     /*---------------------- Navigation Handling ----------------------*/
 
     const navigateToRestaurant = (request) => {
-        getRoute(currentLocation, request.restuarant.location)
+        getRoute(currentLocationRef.current, request.restuarant.location)
     }
 
     const navigateToNGO = (request) => {
-        getRoute(request.restuarant.location, request.NGO.location)
+        getRoute(currentLocationRef.current, request.NGO.location)
     }
 
     const navigateToHome = (request) => {
-        getRoute(request.NGO.location, request.home.location)
+        getRoute(currentLocationRef.current, request.home.location)
     }
 
     const navigateToStudent = (request) => {
-        getRoute(request.restuarant.location, request.student.location)
+        getRoute(currentLocationRef.current, request.student.location)
     }
 
     const filterNearbyRequests = async (requests) => {
@@ -288,21 +304,21 @@ export default function index() {
 
             if (request.type === "home") {
                 if (request.status === "packed") {
-                    destination = request.restuarant.location
+                    destination = formatLocation(request.restuarant.location)
                 }
 
                 if (request.status === "prepared") {
-                    destination = request.NGO.location
+                    destination = formatLocation(request.NGO.location)
                 }
             }
             
             if (request.type === "student") {
                 if (request.status === "packed") {
-                    destination = request.restuarant.location
+                    destination = formatLocation(request.restuarant.location)
                 }
 
                 if (request.status === "picked") {
-                    destination = request.student.location
+                    destination = formatLocation(request.student.location)
                 }   
             }
 
@@ -332,9 +348,15 @@ export default function index() {
         
         setNearbyRequests(formattedNearby)
 
+        console.log(formattedNearby)
+
         if (nearby.length) {
-            setCurrentRequestId(nearby[0].requestId)
-            setShowRequestCard(true)
+            setCurrentRequestId(formattedNearby)
+            
+            if (!currentRequestId) {
+                setCurrentRequestId(formattedNearby[0].requestId)
+                setShowRequestCard(true)
+            }
         }
     }
 
@@ -350,7 +372,7 @@ export default function index() {
 
             return data.features[0].properties.distance / 1000;
         } catch (error) {
-            console.log("getDistanceKM : ", error);
+            console.log("getDistanceKM : ", error, "start & End", start, end);
         }
     }
 
@@ -375,7 +397,10 @@ export default function index() {
             }
 
             const point = routeCoords[index];
-            setCurrentLocation(point);
+            setCurrentLocation({
+                latitude: point.latitude,
+                longitude: point.longitude
+            });
 
             const volunteerRef = doc(db, "volunteers", volunteerId);
 
@@ -383,6 +408,8 @@ export default function index() {
                 location: point,
                 lastUpdated: new Date(),
             });
+
+            updateLocation(point);
 
             index++;
         }, 200);
@@ -471,6 +498,9 @@ export default function index() {
                 destination = currentRequest.home.location
                 const arrived = isNear(currentLocation, destination)
 
+                console.log(arrived)
+                
+
                 if (arrived) {
                     Alert.alert(
                         "Delivery Notification",
@@ -494,6 +524,8 @@ export default function index() {
                 destination = currentRequest.restuarant.location
                 const arrived = isNear(currentLocation, destination)
 
+                console.log("student : ", arrived)
+
                 if (arrived) {
                     Alert.alert(
                         "Pick Up Notification",
@@ -513,6 +545,7 @@ export default function index() {
             if (currentRequest.status === "picked") {
                 destination = currentRequest.student.location
                 const arrived = isNear(currentLocation, destination)
+                console.log("student : ", arrived)
 
                 if (arrived) {
                     Alert.alert(
@@ -544,6 +577,22 @@ export default function index() {
         await updateDoc(requestRef, {
             status: newStatus
         })
+    }
+
+    const handleCloseRequest = () => {
+        if (nearbyRequests === 0) return
+
+        const updatedRequests = nearbyRequests.slice(1) // remove the first element
+
+        setNearbyRequests(updatedRequests)
+
+        if (updatedRequests > 0) {
+            setCurrentRequestId(updatedRequests[0].requestId)
+            setShowRequestCard(true)
+        } else {
+            setCurrentRequestId(null);
+            setShowRequestCard(false);
+        }
     }
 
     return (
@@ -592,12 +641,33 @@ export default function index() {
             { currentRequest?.type === "home" && showRequestCard && (
                 <View style={styles.cardContainer}>
                     <View style={styles.requestCard}>
-                        <Text>
-                            Destination : {currentRequest?.restuarant?.name}
-                        </Text>
-                        <Text>
-                            Distance : {currentRequest?.distance}
-                        </Text>
+                        <View style={{display: "flex", flexDirection: "row",justifyContent: "space-between"}}>
+                            <View 
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    backgroundColor: Colors.default.primary,
+                                    borderRadius: 10,
+                                    paddingHorizontal: 12,  
+                                    paddingVertical: 4,   
+                                    alignSelf: "flex-start",
+                                    justifyContent: "center",
+                                    gap: 4,
+                                }}
+                                >
+                                    <Entypo name="home" size={12} color="white" />
+                                    <Text style={{fontFamily: fonts.semiBold, color: "white", fontSize: 12}}>Home Request</Text>
+                            </View>
+                            <FontAwesome name="close" size={24} color="#d41515ff" onPress={handleCloseRequest}/>
+                        </View>
+                        <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
+                            <Ionicons name="restaurant" size={24} color="black" />
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.restuarant?.name}</Text>
+                        </View>
+                        <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
+                            <FontAwesome6 name="location-dot" size={24} color="black" />
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.NGO?.name}</Text>
+                        </View>
                         <TouchableOpacity onPress={handleAccept} style={globalStyles.button}>
                             <Text style={globalStyles.buttonText}>Accept</Text>
                         </TouchableOpacity>
@@ -608,6 +678,25 @@ export default function index() {
             {currentRequest?.type === "student" && showRequestCard && (
                 <View style={styles.cardContainer}>
                     <View style={styles.requestCard}>
+                        <View style={{display: "flex", flexDirection: "row",justifyContent: "space-between"}}>
+                            <View 
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    backgroundColor: Colors.default.primary,
+                                    borderRadius: 10,
+                                    paddingHorizontal: 12,  
+                                    paddingVertical: 4,   
+                                    alignSelf: "flex-start",
+                                    justifyContent: "center",
+                                    gap: 4,
+                                }}
+                                >
+                                    <FontAwesome6 name="graduation-cap" size={12} color="white" />
+                                    <Text style={{fontFamily: fonts.semiBold, color: "white", fontSize: 12}}>Student Request</Text>
+                            </View>
+                            <FontAwesome name="close" size={24} color="#d41515ff" onPress={handleCloseRequest} />
+                        </View>
                         <Text>
                             Destination : {currentRequest?.restuarant?.name}
                         </Text>

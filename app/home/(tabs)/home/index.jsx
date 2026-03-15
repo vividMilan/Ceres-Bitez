@@ -8,7 +8,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
@@ -77,13 +77,8 @@ export default function index() {
                     style={styles.shopCard}
                     onPress={() => handleRequestClick(item)}
                 >
-                    <Image 
-                        source={{ uri: item.image || "https://via.placeholder.com/400x200" }} 
-                        style={{ width: "100%", height: 200, borderRadius: 5 }} 
-                    />
-    
                     <View style={styles.title}>
-                        <Text style={styles.shopName}>{item.ngo || "Unknown NGO"}</Text>
+                        <Text style={styles.shopName}>{item.NGO?.name || "Unknown NGO"}</Text>
                     </View>
     
                     <View style={styles.ratingRow}>
@@ -167,11 +162,24 @@ export default function index() {
                     onPress={setSelected}
                 />
             </View>
-            <FlatList
-                data={requests}
-                keyExtractor={(item) => item.id}
-                renderItem={renderRequest}
-            />
+
+            {
+                requests.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>
+                            No Ongoing {selected} Requests
+                        </Text>
+                    </View>
+                ) : (
+
+                    <FlatList
+                        data={requests}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderRequest}
+                    />
+                )
+            }
+
         </SafeAreaView>
     );
 }
@@ -200,5 +208,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 5,
+    },
+    emptyContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 40,
+        gap: 10,
+    },
+
+    emptyText: {
+        fontSize: 18,
+        color: "gray",
+        fontFamily: fonts.regular,
     },
 });

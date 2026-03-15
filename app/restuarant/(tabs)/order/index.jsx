@@ -6,8 +6,7 @@ import { db } from "@/firebaseConfig";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { View } from "react-native-reanimated/lib/typescript/Animated";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const progressStatus = [
@@ -21,10 +20,12 @@ export default function Index() {
     const router = useRouter()
 
     const [requests, setRequests] = useState([])
-    const [selected, setSelected] = useState("ngo")
+    const [selected, setSelected] = useState("NGO")
 
-    const filteredRequests = requests
-        .filter(r => r.type === selected)
+    const filteredRequests = requests.filter(r => {
+        if (selected === "NGO") return r.type === "home";   
+        if (selected === "Student") return r.type === "student";
+    });
 
     useEffect(() => {
         const q = query(
@@ -119,8 +120,8 @@ export default function Index() {
             </Text>
             <Chip 
                 options={["NGO", "Student"]}
-                selected={selected === "ngo" ? "NGO" : "Student"}
-                onPress={(value) => setSelected(value.toLowerCase())}
+                selected={selected}
+                onPress={setSelected}
             />
 
             {

@@ -12,7 +12,7 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function index() {
     const [requests, setRequests] = useState([]);
@@ -97,14 +97,28 @@ export default function index() {
     };
 
     return (
-        <SafeAreaProvider style={globalStyles.container}>
+        <SafeAreaView style={globalStyles.container}>
             <Text style={globalStyles.titleText}>Pending Queue</Text>
-            <FlatList
-                data={requests}
-                keyExtractor={(item) => item.id}
-                renderItem={renderRequest}
-            />
-        </SafeAreaProvider>
+
+            {
+                requests.length === 0 ? (
+
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>
+                            No Pending Requests
+                        </Text>
+                    </View>
+
+                ) : (
+                    <FlatList
+                        data={requests}
+                        keyExtractor={(item) => item.id}
+                        renderItem={renderRequest}
+                    />
+                )
+            }
+
+        </SafeAreaView>
     );
 }
 
@@ -131,5 +145,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 5,
+    },
+    emptyContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 40,
+        gap: 10,
+    },
+
+    emptyText: {
+        fontSize: 18,
+        color: "gray",
+        fontFamily: fonts.regular,
     },
 });
