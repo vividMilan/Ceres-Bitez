@@ -64,7 +64,7 @@ export default function login() {
             const userCredential = await firebaseLogin(email, password);
             // Validate that this user is actually a student
             await validateUserRole(userCredential.uid, "student");
-            router.push("/student");
+            router.push("/student/(tabs)/home");
         } catch (error) {
             setError({ password: error.message || "Access denied. You are not registered as a student." });
 

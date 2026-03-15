@@ -50,7 +50,7 @@ export default function Index() {
         }
 
         if (selectedId === "restuarant") {
-            router.navigate("/(auth)/(restuarant)/signUp");
+            router.navigate("/(auth)/(restaurant)/signUp");
         }
 
         if (selectedId === "volunteer") {
