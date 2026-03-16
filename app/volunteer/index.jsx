@@ -1,7 +1,7 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -34,7 +34,7 @@ export default function index() {
 
     const acceptTimeout = useRef(null);
 
-    const volunteerId = "V9iAalOh7ufEfJ4XCiVp";
+    const volunteerId = auth.currentUser.uid;
 
     const updateLocation = (coords) => {
         setCurrentLocation(coords)
@@ -77,7 +77,7 @@ export default function index() {
                 setCurrentRegion(region)
                 updateLocation({latitude, longitude})
 
-                const volunteerRef = doc(db, "volunteers", volunteerId)
+                const volunteerRef = doc(db, "volunteer", volunteerId)
 
                 await updateDoc(volunteerRef, {
                     location: {
@@ -119,7 +119,7 @@ export default function index() {
 
     const handleButton = async () => {
         try {
-            const volunteerRef = doc(db, "volunteers", "V9iAalOh7ufEfJ4XCiVp")
+            const volunteerRef = doc(db, "volunteer", auth.currentUser.uid)
 
             if (volunteerRef) {
                 await updateDoc(volunteerRef, {
@@ -293,12 +293,8 @@ export default function index() {
         getRoute(currentLocationRef.current, request.student.location)
     }
 
-    const navigateToStudent = (request) => {
-        getRoute(request.restuarant.location, request.student.location)
-    }
-
     const filterNearbyRequests = async (requests) => {
-        if (!requests) return
+        if (!requests || !currentLocation) return
 
         const nearby = []
         
@@ -355,7 +351,7 @@ export default function index() {
         console.log(formattedNearby)
 
         if (nearby.length) {
-            setCurrentRequestId(formattedNearby)
+            setCurrentRequestId(formattedNearby[0].requestId)
             
             if (!currentRequestId) {
                 setCurrentRequestId(formattedNearby[0].requestId)
@@ -406,7 +402,7 @@ export default function index() {
                 longitude: point.longitude
             });
 
-            const volunteerRef = doc(db, "volunteers", volunteerId);
+            const volunteerRef = doc(db, "volunteer", volunteerId);
 
             await updateDoc(volunteerRef, {
                 location: point,
@@ -584,13 +580,13 @@ export default function index() {
     }
 
     const handleCloseRequest = () => {
-        if (nearbyRequests === 0) return
+        if (nearbyRequests.length === 0) return
 
         const updatedRequests = nearbyRequests.slice(1) // remove the first element
 
         setNearbyRequests(updatedRequests)
 
-        if (updatedRequests > 0) {
+        if (updatedRequests.length > 0) {
             setCurrentRequestId(updatedRequests[0].requestId)
             setShowRequestCard(true)
         } else {
@@ -642,7 +638,7 @@ export default function index() {
                 </TouchableOpacity>
             )}
 
-            { currentRequest?.type === "home" && showRequestCard && (
+            { currentRequest?.type === "home" && currentRequest.status === "packed" && showRequestCard && (
                 <View style={styles.cardContainer}>
                     <View style={styles.requestCard}>
                         <View style={{display: "flex", flexDirection: "row",justifyContent: "space-between"}}>
@@ -666,11 +662,50 @@ export default function index() {
                         </View>
                         <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
                             <Ionicons name="restaurant" size={24} color="black" />
-                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.restuarant?.name}</Text>
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.restuarant?.restaurantName}</Text>
                         </View>
                         <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
                             <FontAwesome6 name="location-dot" size={24} color="black" />
-                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.NGO?.name}</Text>
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.NGO?.ngoName}</Text>
+                        </View>
+                        <TouchableOpacity onPress={handleAccept} style={globalStyles.button}>
+                            <Text style={globalStyles.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
+
+
+
+            { currentRequest?.type === "home" && currentRequest.status === "prepared" && showRequestCard && (
+                <View style={styles.cardContainer}>
+                    <View style={styles.requestCard}>
+                        <View style={{display: "flex", flexDirection: "row",justifyContent: "space-between"}}>
+                            <View 
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    backgroundColor: Colors.default.primary,
+                                    borderRadius: 10,
+                                    paddingHorizontal: 12,  
+                                    paddingVertical: 4,   
+                                    alignSelf: "flex-start",
+                                    justifyContent: "center",
+                                    gap: 4,
+                                }}
+                                >
+                                    <Entypo name="home" size={12} color="white" />
+                                    <Text style={{fontFamily: fonts.semiBold, color: "white", fontSize: 12}}>Home Request</Text>
+                            </View>
+                            <FontAwesome name="close" size={24} color="#d41515ff" onPress={handleCloseRequest}/>
+                        </View>
+                        <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
+                            <FontAwesome6 name="building-ngo" size={24} color="black" />
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.NGO?.ngoName}</Text>
+                        </View>
+                        <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
+                            <FontAwesome6 name="location-dot" size={24} color="black" />
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.home?.name}</Text>
                         </View>
                         <TouchableOpacity onPress={handleAccept} style={globalStyles.button}>
                             <Text style={globalStyles.buttonText}>Accept</Text>
@@ -696,17 +731,19 @@ export default function index() {
                                     gap: 4,
                                 }}
                                 >
-                                    <FontAwesome6 name="graduation-cap" size={12} color="white" />
+                                    <FontAwesome6 name="graduation-cap" size={24} color="white" />
                                     <Text style={{fontFamily: fonts.semiBold, color: "white", fontSize: 12}}>Student Request</Text>
                             </View>
-                            <FontAwesome name="close" size={24} color="#d41515ff" onPress={handleCloseRequest} />
+                            <FontAwesome name="close" size={24} color="#d41515ff" onPress={handleCloseRequest}/>
                         </View>
-                        <Text>
-                            Destination : {currentRequest?.restuarant?.name}
-                        </Text>
-                        <Text>
-                            Distance : {currentRequest?.distance}
-                        </Text>
+                        <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
+                            <Ionicons name="restaurant" size={24} color="black" />
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.restuarant?.restaurantName}</Text>
+                        </View>
+                        <View style={{display: "flex", flexDirection: "row", justifyContent: "center", gap: "8", alignItems: "center", alignSelf: "flex-start"}}>
+                            <FontAwesome6 name="location-dot" size={24} color="black" />
+                            <Text style={{fontFamily: fonts.regular}}>{currentRequest.student?.name}</Text>
+                        </View>
                         <TouchableOpacity onPress={handleAccept} style={globalStyles.button}>
                             <Text style={globalStyles.buttonText}>Accept</Text>
                         </TouchableOpacity>

@@ -89,7 +89,7 @@ const OtpVerification = () => {
         const userRole = userData.userRole || "user"; // Get role from signup data
 
         console.log(userRole + " signed up successfully with email: " + pendingEmail);
-        router.push(`/(auth)/(${userRole})/login`);
+        router.push(`/(auth)/(${(userRole === "ngo" ? "NGO" : userRole)})/login`);
 
       } catch (error) {
         console.error("Signup failed during OTP verification:", error);

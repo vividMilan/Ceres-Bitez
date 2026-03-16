@@ -1,23 +1,53 @@
 import { fonts } from "@/constants/fonts";
 import { Colors } from "@/constants/theme";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
+import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { doc, updateDoc } from "firebase/firestore";
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { doc, GeoPoint, updateDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function progress6() {
 
+    const [currentLocation, setCurrentLocation] = useState(null)
+
     const {requestId} = useLocalSearchParams()
     const router = useRouter()
+
+    const restuarantId = auth.currentUser.uid
+
+    useEffect(() => {
+      const fetchLocation = async () => {
+        const {status} = await Location.requestForegroundPermissionsAsync()
+
+        if (status !== "granted") {
+          Alert.alert("Location Permission Required")
+          return
+        }
+
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High
+        })
+
+        const {latitude, longitude} = location.coords
+
+        setCurrentLocation({latitude, longitude})
+      }
+
+      fetchLocation()
+    }, [  ])
 
     const handleReadyToDeliver =  async () => {
         try {
             const requestRef = doc(db, "requests", requestId)
 
             await updateDoc(requestRef, {
-                status: "packed"
+                status: "packed",
+                "restuarant.location": new GeoPoint(
+                  currentLocation.latitude,
+                  currentLocation.longitude
+                )
             })
 
             router.replace("/restuarant/(deliveryProgress)/progress3")

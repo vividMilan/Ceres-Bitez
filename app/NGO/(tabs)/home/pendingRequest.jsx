@@ -1,12 +1,13 @@
 import Spinner from "@/components/Spinner";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, GeoPoint, getDoc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,7 +16,10 @@ export default function pendingRequest() {
 
     const [request, setRequest] = useState(null)
     const [loading, setLoading] = useState(true)
+    const [location, setLocation] = useState(null)
 
+    const ngoId = auth.currentUser.uid
+ 
     const router = useRouter();
 
     const requestDate = request?.date?.toDate
@@ -55,6 +59,35 @@ export default function pendingRequest() {
         fetchRequest()
     }, [requestId])
 
+    useEffect(() => {
+        getCurrentLocation()
+    }, [])
+
+    const getCurrentLocation = async () => {
+        try {
+            setLoading(true)
+            const {status} = await Location.requestForegroundPermissionsAsync()
+
+            if (status !== "granted") {
+                return
+            }
+
+            const fetchedLocation = await Location.getCurrentPositionAsync({
+                accuracy: Location.Accuracy.High
+            })
+
+            const {latitude, longitude} = fetchedLocation.coords
+
+            console.log("Current Location", fetchedLocation.coords)
+
+            setLocation({latitude, longitude})
+        } catch (error) {
+            console.log(error)
+        } finally {
+
+        }
+    }
+
     const getNGODetails = async (NGOId) => {
         try {
             const NGOSnap = await getDoc(doc(db, "ngo", NGOId));
@@ -69,11 +102,17 @@ export default function pendingRequest() {
         try {
             const requestRef = doc(db, "requests", requestId);
 
-            const NGO = await getNGODetails("uwgh6m1Q510uvx15Vxm8");
+            const NGO = await getNGODetails(auth.currentUser.uid);
 
             await updateDoc(requestRef, {
                 status: "n-accepted",
-                NGO: NGO,
+                NGO: {
+                    location: new GeoPoint(
+                        location.latitude,
+                        location.longitude
+                    ),
+                    ...NGO
+                },
             });
 
             router.push({
@@ -82,7 +121,9 @@ export default function pendingRequest() {
                     requestId: requestId,
                 },
             });
-        } catch (error) {}
+        } catch (error) {
+            console.log(error)
+        }
     };
 
     if (loading) {

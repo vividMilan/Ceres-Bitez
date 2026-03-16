@@ -43,6 +43,8 @@ export default function Index() {
         setSelectedId(id);
     };
 
+    
+
     // Function to handle next button press
     const handleNext = () => {
         if (selectedId === "student") {

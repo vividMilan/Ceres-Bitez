@@ -1,3 +1,5 @@
+import { getUserData } from "@/app/(auth)/authController/authMethods";
+import Spinner from "@/components/Spinner";
 import { fontSizes } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
@@ -37,6 +39,8 @@ export default function Index() {
     const [price, setPrice] = useState(null);
     
     const router = useRouter()
+
+    const {userData , loading: userDataLoading} = getUserData()
 
     const openCamera = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -131,8 +135,14 @@ export default function Index() {
 
     const handleAddFood = async () => {
         setLoading(true);
+
+        if (!userData) {
+            Alert.alert("User Not Found")
+            return
+        }
+
         try {
-            const restuarantId = "7ADL1PRfW0V6deM9bR2UjxdSXS72";
+            const restuarantId = userData.uid;
 
             const imageUrl = await uploadImage(imageUri);
             const notSuitableAt = Timestamp.fromMillis(
@@ -143,7 +153,7 @@ export default function Index() {
                 name,
                 quantity: Number(quantity),
                 vegNonVeg,
-                restuarantId,
+                restuarantId: restuarantId,
                 imageUrl,
                 createdAt: serverTimestamp(),
                 notSuitableAt,
@@ -163,6 +173,12 @@ export default function Index() {
             setLoading(false);
         }
     };
+
+    if (userDataLoading) {
+        return (
+            <Spinner />
+        )
+    }
 
     return (
         <SafeAreaView style={globalStyles.container}>

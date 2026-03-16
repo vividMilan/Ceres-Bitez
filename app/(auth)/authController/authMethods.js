@@ -116,13 +116,16 @@ const getUserData = () => {
         const fetchUserData = async () => { 
             try {
                 const currentUser = auth.currentUser;
+                
+                console.log(currentUser)
+
                 if (!currentUser) {
                     setLoading(false);
                     return;
                 }
                 const home = await getDoc(doc(db, "home", currentUser.uid));
                 const ngo = await getDoc(doc(db, "ngo", currentUser.uid));
-                const restaurants = await getDoc(doc(db, "restaurants", currentUser.uid));
+                const restaurants = await getDoc(doc(db, "restaurant", currentUser.uid));
                 const volunteers = await getDoc(doc(db, "volunteers", currentUser.uid));
                 const students = await getDoc(doc(db, "student", currentUser.uid));
                 let snp = null;

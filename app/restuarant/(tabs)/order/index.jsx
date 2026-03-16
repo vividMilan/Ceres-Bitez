@@ -6,7 +6,7 @@ import { db } from "@/firebaseConfig";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const progressStatus = [
@@ -104,9 +104,8 @@ export default function Index() {
                         borderRadius: 34
                     }}
                 >
-                    <Image source={{uri: item.NGO?.imageUrl}} style={{width: "100%", height: 150, marginBottom: 10, borderRadius: 20}}  />
                     <Text style={{fontSize: 20, fontFamily: fonts.semiBold}}>
-                        {item.NGO?.name || "Unkown NGO"}
+                        {item.NGO?.ngoName || "Unkown NGO"}
                     </Text>
                 </TouchableOpacity>
             )

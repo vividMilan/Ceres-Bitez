@@ -1,7 +1,7 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -16,19 +16,21 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
 
-    const studentId = "czdMs8Z3GTXLTCbyExVKaXsOAa62"
-
+    
+    
     const router = useRouter()
-
+    
     const [requests, setRequests] = useState([])
     const [loading, setLoading] = useState(true)
-
+    const studentId = auth.currentUser.uid
+    
     useEffect(() => {
-        
+        console.log("Student : ", studentId)
+
         const q = query(
             collection(db, "requests"),
             where("type", "==", "student"),
-            where("student.studentId", "==", studentId),
+            where("student.uid", "==", studentId),
             where("status", "!=", "delivered")
         )
 
@@ -44,6 +46,8 @@ export default function Index() {
             })
 
             setRequests(data)
+
+            console.log(data)
             setLoading(false)
         })
 
@@ -62,7 +66,7 @@ export default function Index() {
         return (
             <TouchableOpacity style={styles.requestCard} onPress={() => router.push({pathname: "/student/(deliveryProgress)", params: {requestId: item.requestId}})}>
                 <Text style={{ fontSize: 20, fontFamily: fonts.semiBold }}>
-                    {item.restuarant?.name}
+                    {item.restuarant?.restaurantName}
                 </Text>
 
                 <Text

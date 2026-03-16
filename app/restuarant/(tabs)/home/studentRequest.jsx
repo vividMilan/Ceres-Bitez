@@ -3,9 +3,11 @@ import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
+import * as Location from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
     doc,
+    GeoPoint,
     getDoc,
     onSnapshot,
     updateDoc
@@ -19,6 +21,7 @@ export default function studentRequest() {
     const [requests, setRequest] = useState(null)
     const [loading, setLoading] = useState(false);
     const { requestId } = useLocalSearchParams()
+    const [currentLocation, setCurrentLocation] = useState(null)
 
     const router = useRouter()
         
@@ -49,11 +52,41 @@ export default function studentRequest() {
         }
     }, [requestId])
 
+    useEffect(() => {
+        const getCurrentLocation = async () => {
+            try {
+                const {status} = await Location.getForegroundPermissionsAsync()
+
+                if (status !== "granted") {
+                    Alert.alert("Location Permission is required")
+                    return
+                }
+
+                const location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.High
+                })
+
+                const {latitude, longitude} = location.coords
+
+                setCurrentLocation({latitude, longitude})
+            } catch (error) {
+                console.log(error.message)
+            }
+        }
+
+        getCurrentLocation()
+    }, [])
+
     const parsedFoods = requests?.foodItems || []
     const totalPrice = requests?.totalPrice || 0
 
     const handleRequest = async () => {
         try {
+
+            if (!currentLocation) {
+                Alert.alert("Location is not ready")
+                return
+            }
             setLoading(true);
 
             for (const food of parsedFoods) {
@@ -74,6 +107,10 @@ export default function studentRequest() {
                 const requestRef = doc(db, "requests", requestId);
                 await updateDoc(requestRef, {
                     status: "r-accepted",
+                    "restuarant.location": new GeoPoint(
+                        currentLocation.latitude,
+                        currentLocation.longitude
+                    )
                 });
             }
 
@@ -148,7 +185,7 @@ export default function studentRequest() {
                 <Text style={{fontFamily: fonts.semiBold}}>Location : </Text>
                 <View>
                     <Text style={{fontFamily: fonts.semiBold}}>
-                        {requests.city}
+                        {requests.address}, {requests.city}
                     </Text>
                 </View>
             </View>

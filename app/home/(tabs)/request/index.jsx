@@ -1,3 +1,5 @@
+import { getUserData } from "@/app/(auth)/authController/authMethods";
+import Spinner from "@/components/Spinner";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
@@ -30,13 +32,34 @@ export default function index() {
 
     const today = new Date()
 
-    const homeId =  "mGwGicHqcwbBFh9tV63k"
+    const {userData, loading: userDataLoading} = getUserData()
 
     const urlBuilder = (latitude, longitude) => {
         return (`https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`)
     }
 
+
+
     const router = useRouter()
+
+        useEffect(() => {
+        getCurrentLocation()
+    }, [])
+
+    useEffect(() => {
+        const fetchHomeDetails = async () => {
+            try {
+                const homeSnap = await getDoc(doc(db, "home", userData.uid))
+
+                setHome(homeSnap.data())
+
+            } catch (error) {
+                console.log(error.message)
+            }
+        } 
+
+        fetchHomeDetails()
+    }, [userData])
 
     const fetchAddress = async (latitude, longitude) => {
         try {
@@ -97,7 +120,7 @@ export default function index() {
             status: "pending",
             createdAt: serverTimestamp(),
             home : {
-                homeId: homeId,
+                homeId: userData.uid,
                 location: new GeoPoint(
                     item.currentLocation.latitude,
                     item.currentLocation.longitude
@@ -154,24 +177,11 @@ export default function index() {
         }
     }
 
-    useEffect(() => {
-        getCurrentLocation()
-    }, [])
-
-    useEffect(() => {
-        const fetchHomeDetails = async () => {
-            try {
-                const homeSnap = await getDoc(doc(db, "home", homeId))
-
-                setHome(homeSnap.data())
-
-            } catch (error) {
-                console.log(error.message)
-            }
-        } 
-
-        fetchHomeDetails()
-    }, [homeId])
+    if (userDataLoading) {
+        return (
+            <Spinner text="Loading..." />
+        )
+    }
 
 
     return (
@@ -247,4 +257,4 @@ export default function index() {
             </TouchableOpacity>
         </SafeAreaView>
     )
-}34
+}

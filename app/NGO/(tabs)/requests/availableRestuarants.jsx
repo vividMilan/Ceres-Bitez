@@ -53,7 +53,7 @@ export default function availableRestuarants() {
                 const restaurantData = []
 
                 for (const restuarantId of restaurantIdSet) {
-                    const restuarantSnap = await getDoc(doc(db, "restaurants", restuarantId))
+                    const restuarantSnap = await getDoc(doc(db, "restaurant", restuarantId))
 
                     if (restuarantSnap.exists()) {
                         restaurantData.push({
@@ -94,8 +94,8 @@ export default function availableRestuarants() {
                 params: { 
                     requestId: item.requestId,
                     restuarantId: item.restuarantId,
-                    restuarantName: item.name,
-                    restuarantImage: item.imageUrl,
+                    restuarantName: item.restaurantName,
+                    restuarantImage: item.image,
                     suitableFoods: JSON.stringify(item.suitableFoods)
                 },
                 })
@@ -103,12 +103,12 @@ export default function availableRestuarants() {
         >
 
             <Image 
-                source={{uri: item.imageUrl}}
+                source={{uri: item.image}}
                 style={{ width: "100%", height: 150 }}
             />
             <View style={{ padding: 10 }}>
-                <Text style={{ fontSize: 18, fontWeight: "600" }}>{item.name}</Text>
-                <Text>Contact: {item.mobile}</Text>
+                <Text style={{ fontSize: 18, fontWeight: "600" }}>{item.restaurantName}</Text>
+                <Text>Contact: {item.mobileNumber}</Text>
                 <Text>Email: {item.email}</Text>
             </View>
         </TouchableOpacity>

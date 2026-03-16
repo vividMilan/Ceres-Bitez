@@ -1,6 +1,6 @@
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import Entypo from '@expo/vector-icons/Entypo';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -21,30 +21,31 @@ export default function ngoRequest() {
     const parsedSelectedFood = JSON.parse(selectedFood)
     const parsedHomeDetails = JSON.parse(home)
 
-    const restuarantId = "7ADL1PRfW0V6deM9bR2UjxdSXS72"
+    const restuarantId = auth.currentUser.uid
 
-
+    
+    
     const fetchHomeAddress = async () => {
         try {
             if (parsedHomeDetails?.location) {
                 const lat = parsedHomeDetails.location.latitude
                 const lon = parsedHomeDetails.location.longitude
-
+                
                 const response = await fetch(
-                        `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`
-
+                    `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&format=json&apiKey=${process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY}`
+                    
                 );
-
+                
                 const data = await response.json();
-
+                
                 console.log(data)
                 if (data.results && data.results.length > 0) {
                     const addressLine = data.results[0].address_line1;
-
+                    
                     const city = data.results[0].city;
-
+                    
                     const address = `${addressLine}, \n${city}`
-
+                    
                     setHomeAddress(address);
                 } else {
                     setHomeAddress("Address not found");
@@ -54,30 +55,30 @@ export default function ngoRequest() {
             console.log(err.message);
         }
     }
-
+    
     useEffect(() => {
         fetchHomeAddress()
     }, [])
-
+    
     const handleAccept = async() => {
         try {
             const requestRef = doc(db, "requests", requestId)
-
-            const restuarant = (await getDoc(doc(db, "restaurants", restuarantId))).data()
-
+            
+            const restuarant = (await getDoc(doc(db, "restaurant", restuarantId))).data()
+            
             await updateDoc(requestRef, {
                 status: "r-accepted",
                 restuarant: restuarant
             })
-
+            
             Alert.alert("Successfully Accepted ✅")
-
+            
             router.replace("/restuarant/(tabs)/home")
         } catch (err) {
             console.log(err)
         }
     }
-
+    
     if (date) {
         try {
             const parsedDate = JSON.parse(date)
@@ -88,7 +89,7 @@ export default function ngoRequest() {
         }
         
     }
-
+    
     return (
         <SafeAreaView style={[{flex: 1}]}>
             <View style={{flex: 1, justifyContent: "space-between"}}>

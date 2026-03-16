@@ -5,6 +5,7 @@ import { globalStyles } from "@/constants/globalStyle";
 import { Colors } from "@/constants/theme";
 import { db } from "@/firebaseConfig";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -99,7 +100,7 @@ export default function index() {
                                 pathname: "/restuarant/(tabs)/home/ngoRequest",
                                 params: {
                                     requestId: item.requestId,
-                                    name: item.NGO.name,
+                                    name: item.NGO.ngoName,
                                     imageUrl: item.NGO.imageUrl,
                                     date: JSON.stringify(item.date),
                                     quantity: item.qty,
@@ -112,15 +113,26 @@ export default function index() {
 
                         style={styles.requestCard}
                     >
-                        <View style={{display: "flex", flexDirection: "row"}}>
+                        <View style={{display: "flex", flexDirection: "column"}}>
                             <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
                                 {item.home?.name || "Unkown NGO"}
                             </Text>
-                        </View>
-                        <View style={{display: "flex", flexDirection: "row"}}>
-                            <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
-                                {item.home?.name || "Unkown NGO"}
-                            </Text>
+                            <View style={globalStyles.flexDisplay}>
+                                <View style={globalStyles.flexDisplay}>
+                                    <FontAwesome6 name="location-dot" size={24} color="black" />
+                                    <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
+                                        {item.home?.city || "Unkown NGO"}
+                                    </Text>
+                                </View>
+                                <View style={globalStyles.flexDisplay}>
+                                    <FontAwesome6 name="calendar" size={24} color="black" />
+                                    <Text tyle={{fontSize: 20, fontFamily: fonts.semiBold}}>
+                                        {item.date?.seconds 
+                                            ? new Date(item.date.seconds * 1000).toLocaleDateString('en-GB') // Results in DD/MM/YYYY
+                                            : "No Date"}
+                                    </Text>
+                                </View>
+                            </View>
                         </View>
                     </TouchableOpacity>
                 )

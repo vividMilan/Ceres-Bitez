@@ -58,7 +58,7 @@ export default function login() {
             const userCredential = await firebaseLogin(email, password);
             // Validate that this user is actually a home user
             await validateUserRole(userCredential.uid, "home");
-            router.push("/home");
+            router.push("/home/(tabs)/home");
         } catch (error) {
             setError({ password: error.message || "Access denied. You are not registered as a home user." });
         } finally {

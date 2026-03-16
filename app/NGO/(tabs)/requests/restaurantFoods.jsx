@@ -30,7 +30,7 @@ export default function restuarantFoods() {
 
   const foods = suitableFoods ? JSON.parse(suitableFoods) : [];
 
-  // 🔹 Select Only One Food
+  //  Select Only One Food
   const toggleSelect = (food) => {
         if (selectedFood?.id === food.id) {
         setSelectedFood(null);
@@ -39,7 +39,7 @@ export default function restuarantFoods() {
         }
     };
 
-    // 🔹 Send Request to Firebase
+    //  Send Request to Firebase
     const handleRequest = async () => {
         if (!selectedFood) {
             Alert.alert("Please select a food first");

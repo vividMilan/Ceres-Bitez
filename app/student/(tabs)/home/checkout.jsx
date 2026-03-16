@@ -10,6 +10,7 @@ import {
     addDoc,
     collection,
     doc,
+    GeoPoint,
     getDoc,
     serverTimestamp
 } from "firebase/firestore";
@@ -31,7 +32,7 @@ const paymentMethods = [
 ];
 
 export default function CheckOut() {
-    const { shopId, shopName, location, request } = useLocalSearchParams();
+    const { shopId, shopName, location, request, city, address } = useLocalSearchParams();
 
     const {userData, loading: userDataLoading} = getUserData()  
 
@@ -50,18 +51,30 @@ export default function CheckOut() {
         try {
             setLoading(true);
 
-            const restaurantRef = doc(db, "restaurants", shopId);
+            const parsedLocation = JSON.parse(location)
+
+            const restaurantRef = doc(db, "restaurant", shopId);
             const restaurantSnap = await getDoc(restaurantRef);
+
+            const restuarantData = restaurantSnap.data()
+
+            console.log("restuarantData", shopId)
 
             const totalPrice = parsedRequest.reduce((sum, item) => {
                 return sum + item.price * item.qty;
             }, 0);
 
             const requestData = {
-                student: userData,
+                student: {
+                    ...userData,
+                    location: new GeoPoint(
+                        parsedLocation.latitude,
+                        parsedLocation.longitude
+                    )
+                },
                 restuarant: {
                     restuarantId: restaurantSnap.id,
-                    ...restaurantSnap.data()
+                    ...restuarantData
                 },
                 foodItems: parsedRequest,
                 paymentMethod: paymentMethod,

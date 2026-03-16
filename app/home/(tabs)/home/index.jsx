@@ -1,24 +1,19 @@
 import Chip from "@/components/Chip";
+import Spinner from "@/components/Spinner";
 import { fonts } from "@/constants/fonts";
 import { globalStyles } from "@/constants/globalStyle";
-import { db } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-import { collection, onSnapshot, orderBy, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, orderBy, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 const requestStatus = ["Ongoing", "Pending"];
-
-const homeDetails = {
-    name: "Suhhinda Elders Home",
-    address: "123, Main Street, City",
-    location: "Mirihana",
-};
 
 const ongoingStatuses = [
     "n-accepted",
@@ -36,6 +31,41 @@ export default function index() {
     const router = useRouter()
     const [selected, setSelected] = useState("Ongoing");
     const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true)
+    const [homeDetails, setHomeDetails] = useState(null)
+
+    const uid = auth.currentUser.uid
+
+    useEffect(() => {
+
+        if (!uid) {
+            Alert.alert("User Not Found")
+        }
+
+        const fetchHomeDetails = async () => {
+            try {
+                const homeId = uid
+
+                const homeSnap = await getDoc(doc(db, "home", uid))
+
+                const data = {
+                    homeId: homeId,
+                    ...homeSnap.data()
+                }
+
+                setHomeDetails(data)
+
+            } catch (error) {
+                console.log(error.message)
+            } finally {
+                setLoading(false)
+            }
+        } 
+
+        fetchHomeDetails()
+    }, [])
+
+
 
     const renderRequest = ({ item }) => {
         // Safely convert Firestore timestamp to JS Date
@@ -78,7 +108,7 @@ export default function index() {
                     onPress={() => handleRequestClick(item)}
                 >
                     <View style={styles.title}>
-                        <Text style={styles.shopName}>{item.NGO?.name || "Unknown NGO"}</Text>
+                        <Text style={styles.shopName}>{item.NGO?.ngoName || "Unknown NGO"}</Text>
                     </View>
     
                     <View style={styles.ratingRow}>
@@ -151,9 +181,15 @@ export default function index() {
         }
     };
 
+    if (loading) {
+        return (
+            <Spinner />
+        )
+    }
+
     return (
         <SafeAreaView style={globalStyles.container}>
-            <Text style={globalStyles.titleText}>{homeDetails.name}</Text>
+            <Text style={globalStyles.titleText}>{homeDetails?.name}</Text>
             <Text style={globalStyles.subTitleText}>{selected} Orders</Text>
             <View>
                 <Chip
